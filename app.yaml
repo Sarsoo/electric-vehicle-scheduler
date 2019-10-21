@@ -1,0 +1,12 @@
+runtime: python37
+
+handlers:
+- url: /static
+  static_dir: build
+
+- url: /.*
+  script: auto
+  secure: always
+
+env_variables:
+  DEPLOY_DESTINATION: 'PROD'
