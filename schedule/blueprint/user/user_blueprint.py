@@ -4,6 +4,9 @@ import logging
 
 from google.cloud import firestore
 
+import schedule.db.database as database
+import schedule.interface.interface as interface
+
 blueprint = Blueprint('bp_user', __name__)
 db = firestore.Client()
 
@@ -23,16 +26,60 @@ def user(username=None):
         return delete_user(username)
 
 
-def get_user(username):
-    return None
+def get_user(username: str):
+    if request.args.get('username'):
+        username = request.args.get('username')
+
+    user_obj = database.get_user(username)
+
+    if user_obj is not None:
+        return jsonify(interface.create_response({
+            'user': user_obj.to_dict()
+        }, success=True)), 200
+    else:
+        return jsonify(interface.create_response({
+            'error': f'user {username} not found'
+        }, error=True)), 404
 
 
 def post_user(username):
-    return None
+    if request.args.get('username'):
+        username = request.args.get('username')
+
+    user_obj = database.get_user(username)
+
+    if user_obj is not None:
+
+        # TODO make user updates
+
+        return jsonify(interface.create_response({
+            'message': f'user {username} updated'
+        }, success=True)), 200
+    else:
+        return jsonify(interface.create_response({
+            'error': f'user {username} not found'
+        }, error=True)), 404
 
 
 def put_user(username):
-    return None
+    request_json = request.get_json()
+
+    if 'username' not in request_json:
+        return jsonify(interface.create_response({
+            'error': 'no username provided'
+        }, error=True)), 400
+
+    users = [i for i in db.collection(u'user').where(u'username', u'==', request_json.get('username')).stream()]
+
+    if len(users) > 0:
+        return jsonify(interface.create_response({
+            'error': f'username {request_json.get("username")} already registered'
+        }, error=True)), 403
+
+    database.create_user(request_json.get('username'))
+    return jsonify(interface.create_response({
+            'message': f'user {request_json.get("username")} created'
+        }, success=True)), 200
 
 
 def delete_user(username):

@@ -23,7 +23,8 @@ def get_user(username: str) -> Optional[User]:
 
     user = users[0].to_dict()
 
-    return User(username=user.get('username'))
+    return User(username=user.get('username'),
+                db_ref=users[0].reference)
 
 
 def create_user(username: str) -> None:
@@ -45,23 +46,26 @@ def create_user(username: str) -> None:
     user_collection.document().set(user_info)
 
 
-def update_user(username: str):
-    pass
+def update_user(username: str, updates: dict):
+    logger.info(f'updating {username}')
+
+    user = get_user(username)
+
+    if user is not None:
+        user.db_ref.update(updates)
+    else:
+        logger.error('no user returned')
 
 
 def delete_user(username: str) -> None:
     logger.info(f'deleting {username}')
 
-    users = [i for i in db.collection(u'user').where(u'username', u'==', username).stream()]
+    user = get_user(username)
 
-    if len(users) == 0:
-        logger.error(f'user {username} not found')
-        return None
-    if len(users) > 1:
-        logger.critical(f"multiple {username}'s found")
-        return None
-
-    users[0].reference.delete()
+    if user is not None:
+        user.db_ref.delete()
+    else:
+        logger.error('no user returned')
 
 
 def get_location(location_id: str) -> Optional[Location]:
@@ -78,7 +82,8 @@ def get_location(location_id: str) -> Optional[Location]:
 
     location = locations[0].to_dict()
 
-    return Location(location_id=location.get('location_id'))
+    return Location(location_id=location.get('location_id'),
+                    db_ref=locations[0].reference)
 
 
 def create_location(location_id: str) -> None:
@@ -100,20 +105,23 @@ def create_location(location_id: str) -> None:
     location_collection.document().set(location_info)
 
 
-def update_location(username: str):
-    pass
+def update_location(location_id: str, updates: dict):
+    logger.info(f'retrieving {location_id}')
+
+    location = get_location(location_id)
+
+    if location is not None:
+        location.db_ref.update(updates)
+    else:
+        logger.error('no location returned')
 
 
 def delete_location(location_id: str) -> None:
     logger.info(f'deleting {location_id}')
 
-    locations = [i for i in db.collection(u'location').where(u'location_id', u'==', location_id).stream()]
+    location = get_location(location_id)
 
-    if len(locations) == 0:
-        logger.error(f'location {location_id} not found')
-        return None
-    if len(locations) > 1:
-        logger.critical(f"multiple {location_id}'s found")
-        return None
-
-    locations[0].reference.delete()
+    if location is not None:
+        location.db_ref.delete()
+    else:
+        logger.error('no location returned')
