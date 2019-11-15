@@ -105,7 +105,8 @@ def get_location(location_id: str) -> Optional[Location]:
     location = locations[0].to_dict()
 
     return Location(location_id=location.get('location_id'),
-                    db_ref=locations[0].reference)
+                    db_ref=locations[0].reference,
+                    chargers=None)
 
 
 def create_location(location_id: str) -> None:
