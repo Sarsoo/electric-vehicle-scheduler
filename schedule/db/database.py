@@ -5,6 +5,8 @@ from typing import Optional
 from schedule.model.user import User
 from schedule.model.location import Location
 
+from werkzeug.security import generate_password_hash
+
 db = firestore.Client()
 logger = logging.getLogger(__name__)
 
@@ -21,13 +23,31 @@ def get_user(username: str) -> Optional[User]:
         logger.critical(f"multiple {username}'s found")
         return None
 
-    user = users[0].to_dict()
-
-    return User(username=user.get('username'),
-                db_ref=users[0].reference)
+    return parse_user(user_snapshot=users[0])
 
 
-def create_user(username: str) -> None:
+def parse_user(user_ref=None, user_snapshot=None) -> User:
+    if user_ref is None and user_snapshot is None:
+        raise ValueError('no user object supplied')
+
+    if user_ref is None:
+        user_ref = user_snapshot.reference
+
+    if user_snapshot is None:
+        user_snapshot = user_ref.get()
+
+    user_dict = user_snapshot.to_dict()
+
+    return User(username=user_dict.get('username'),
+                password=user_dict.get('password'),
+                db_ref=user_ref,
+
+                user_type=User.Type[user_dict.get('type')])
+
+
+def create_user(username: str,
+                password: str,
+                user_type: User.Type) -> None:
     logger.info(f'creating {username}')
 
     user_collection = db.collection(u'user')
@@ -40,7 +60,9 @@ def create_user(username: str) -> None:
 
     # USER DATABASE ENTITY MANIFEST
     user_info = {
-        'username': username
+        'username': username,
+        'password': generate_password_hash(password),
+        'type': user_type.name
     }
 
     user_collection.document().set(user_info)

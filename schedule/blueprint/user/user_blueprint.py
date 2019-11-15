@@ -5,7 +5,8 @@ import logging
 from google.cloud import firestore
 
 import schedule.db.database as database
-import schedule.interface.interface as interface
+from schedule.blueprint.decorators import basic_auth, admin_required
+from schedule.model.user import User
 
 blueprint = Blueprint('bp_user', __name__)
 db = firestore.Client()
@@ -13,80 +14,137 @@ db = firestore.Client()
 logger = logging.getLogger(__name__)
 
 
-@blueprint.route('/', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@blueprint.route('', methods=['GET', 'POST'])
+@basic_auth
 def user(username=None):
-
     if request.method == 'GET':
         return get_user(username)
     elif request.method == 'POST':
         return post_user(username)
-    elif request.method == 'PUT':
+
+
+@blueprint.route('', methods=['PUT', 'DELETE'])
+@basic_auth
+@admin_required
+def user_restricted(username=None):
+    if request.method == 'PUT':
         return put_user(username)
     elif request.method == 'DELETE':
         return delete_user(username)
 
 
 def get_user(username: str):
-    if request.args.get('username'):
-        username = request.args.get('username')
+
+    if database.get_user(username).user_type == User.Type.admin:
+        if request.args.get('username'):
+            username = request.args.get('username')
 
     user_obj = database.get_user(username)
 
     if user_obj is not None:
-        return jsonify(interface.create_response({
-            'user': user_obj.to_dict()
-        }, success=True)), 200
+        return jsonify({
+            'user': user_obj.to_dict(),
+            'status': 'ok'
+        }), 200
     else:
-        return jsonify(interface.create_response({
-            'error': f'user {username} not found'
-        }, error=True)), 404
+        return jsonify({
+            'message': f'user {username} not found',
+            'status': 'error'
+        }), 404
 
 
 def post_user(username):
-    if request.args.get('username'):
-        username = request.args.get('username')
+
+    if database.get_user(username).user_type == User.Type.admin:
+        if request.args.get('username'):
+            username = request.args.get('username')
 
     user_obj = database.get_user(username)
 
     if user_obj is not None:
 
-        # TODO make user updates
+        request_json = request.get_json()
 
-        return jsonify(interface.create_response({
-            'message': f'user {username} updated'
-        }, success=True)), 200
+        if 'password' in request_json:
+            if 'current_password' not in request_json:
+                return jsonify({
+                    'message': 'current_password must also be provided',
+                    'status': 'error'
+                }), 400
+
+            if user_obj.check_password(request_json['current_password']):
+                user_obj.password = request_json['password']
+            else:
+                return jsonify({
+                    'message': 'wrong password, no other updates made',
+                    'status': 'error'
+                }), 400
+
+        return jsonify({
+            'message': f'user {username} updated',
+            'status': 'ok'
+        }), 200
     else:
-        return jsonify(interface.create_response({
-            'error': f'user {username} not found'
-        }, error=True)), 404
+        return jsonify({
+            'message': f'user {username} not found',
+            'status': 'error'
+        }), 404
 
 
 def put_user(username):
     request_json = request.get_json()
 
     if 'username' not in request_json:
-        return jsonify(interface.create_response({
-            'error': 'no username provided'
-        }, error=True)), 400
+        return jsonify({
+            'message': 'no username provided',
+            'status': 'error'
+        }), 400
+
+    if 'password' not in request_json:
+        return jsonify({
+            'message': 'no password provided',
+            'status': 'error'
+        }), 400
 
     users = [i for i in db.collection(u'user').where(u'username', u'==', request_json.get('username')).stream()]
 
     if len(users) > 0:
-        return jsonify(interface.create_response({
-            'error': f'username {request_json.get("username")} already registered'
-        }, error=True)), 403
+        return jsonify({
+            'message': f'username {request_json.get("username")} already registered',
+            'status': 'error'
+        }), 403
 
-    database.create_user(request_json.get('username'))
-    return jsonify(interface.create_response({
-            'message': f'user {request_json.get("username")} created'
-        }, success=True)), 200
+    database.create_user(username=request_json.get('username'),
+                         password=request_json.get('password'),
+                         user_type=User.Type[request_json.get('type', 'user')])
+    return jsonify({
+            'message': f'user {request_json.get("username")} created',
+            'status': 'ok'
+        }), 200
 
 
 def delete_user(username):
-    return None
+    if request.args.get('username'):
+        username = request.args.get('username')
+
+    user_obj = database.get_user(username)
+
+    if user_obj is not None:
+
+        user_obj.db_ref.delete()
+
+        return jsonify({
+            'message': f'{username} deleted',
+            'status': 'ok'
+        }), 200
+    else:
+        return jsonify({
+            'message': f'user {username} not found',
+            'status': 'error'
+        }), 404
 
 
-@blueprint.route('/vehicle', methods=['GET', 'POST', 'PUT', 'DELETE'])
+# @blueprint.route('/vehicle', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def vehicle(username=None):
 
     if request.method == 'GET':
