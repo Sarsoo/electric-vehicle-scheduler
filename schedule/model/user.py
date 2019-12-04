@@ -9,6 +9,7 @@ class User:
     class Type(Enum):
         user = 1
         admin = 2
+        service = 3
 
     def __init__(self,
                  username: str,

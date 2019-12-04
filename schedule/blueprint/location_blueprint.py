@@ -108,7 +108,7 @@ def delete_location(location_id, username):
 
     if location_obj is not None:
 
-        location_obj.db_ref.delete()
+        database.delete_location(location_id)
 
         return jsonify({
             'message': f'{location_id} deleted',
@@ -199,7 +199,7 @@ def post_charger(location_id, charger_id, username):
 def put_charger(location_id, charger_id, username):
     request_json = request.get_json()
 
-    logger.info(f'creating charger for {username}')
+    logger.info(f'creating {location_id}:{charger_id} charger for {username}')
 
     try:
         database.create_charger(location_id, charger_id)
@@ -223,7 +223,7 @@ def delete_charger(location_id, charger_id, username):
 
     if charger_obj is not None:
 
-        charger_obj.db_ref.delete()
+        database.delete_charger(location_id, charger_id)
 
         return jsonify({
             'message': f'{location_id}:{charger_id} deleted',
@@ -238,12 +238,15 @@ def delete_charger(location_id, charger_id, username):
 
 
 @blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['GET'])
+@basic_auth
 def session(location_id, charger_id, username=None):
     if request.method == 'GET':
         return get_session(location_id, charger_id, username)
 
 
 @blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['POST', 'PUT', 'DELETE'])
+@basic_auth
+@admin_required
 def session_restricted(location_id, charger_id, username=None):
     if request.method == 'POST':
         return post_session(location_id, charger_id, username)
@@ -254,16 +257,83 @@ def session_restricted(location_id, charger_id, username=None):
 
 
 def get_session(location_id, charger_id, username):
-    return None
+    logger.info(f'getting {location_id}:{charger_id} session for {username}')
+
+    session_obj = database.get_active_session(location_id, charger_id)
+
+    if session_obj is not None:
+        return jsonify({
+            'session': session_obj.to_dict(),
+            'status': 'ok'
+        }), 200
+    else:
+        logger.error(f'no active session at {location_id}:{charger_id}')
+        return jsonify({
+            'message': f'{location_id}:{charger_id} active session not found',
+            'status': 'error'
+        }), 404
 
 
 def post_session(location_id, charger_id, username):
-    return None
+    logger.info(f'updating {location_id}:{charger_id} session for {username}')
+
+    session_obj = database.get_active_session(location_id, charger_id)
+
+    if session_obj is not None:
+
+        # TODO add changes here
+
+        return jsonify({
+            'message': f'active session {location_id}:{charger_id} updated',
+            'status': 'ok'
+        }), 200
+    else:
+        logger.error(f'no active session at {location_id}:{charger_id}')
+        return jsonify({
+            'message': f'{location_id}:{charger_id} active session not found',
+            'status': 'error'
+        }), 404
 
 
 def put_session(location_id, charger_id, username):
-    return None
+    request_json = request.get_json()
+
+    if request_json is not None and 'username' in request_json:
+        username = request_json.get('username')
+
+    logger.info(f'starting session at {location_id}:{charger_id} for {username}')
+
+    try:
+        database.start_session(location_id, charger_id, database.get_user(username))
+        return jsonify({
+            'message': f'session started at {location_id}:{charger_id}',
+            'status': 'ok'
+        }), 200
+
+    except FileExistsError:
+        logger.error(f'session already running at {location_id}:{charger_id}')
+        return jsonify({
+            'message': f'session already running at {location_id}:{charger_id}',
+            'status': 'error'
+        }), 403
 
 
 def delete_session(location_id, charger_id, username):
-    return None
+    logger.info(f'stopping session at {location_id}:{charger_id} for {username}')
+
+    session_obj = database.get_active_session(location_id, charger_id)
+
+    if session_obj is not None:
+
+        database.end_session(location_id, charger_id)
+
+        return jsonify({
+            'message': f'{location_id}:{charger_id} session stopped',
+            'status': 'ok'
+        }), 200
+    else:
+        logger.info(f'no session running at {location_id}:{charger_id}')
+        return jsonify({
+            'message': f'no session running at {location_id}:{charger_id}',
+            'status': 'error'
+        }), 404
