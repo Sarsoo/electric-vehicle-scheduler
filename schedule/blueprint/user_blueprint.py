@@ -37,7 +37,10 @@ def get_user(username: str):
 
     if database.get_user(username).user_type == User.Type.admin:
         if request.args.get('username'):
+            logger.info(f'getting {request.args.get("username")} for {username}')
             username = request.args.get('username')
+
+    logger.info(f'getting {username}')
 
     user_obj = database.get_user(username)
 
@@ -47,6 +50,7 @@ def get_user(username: str):
             'status': 'ok'
         }), 200
     else:
+        logger.error(f'user {username} not found')
         return jsonify({
             'message': f'user {username} not found',
             'status': 'error'
@@ -57,7 +61,10 @@ def post_user(username):
 
     if database.get_user(username).user_type == User.Type.admin:
         if request.args.get('username'):
+            logger.info(f'updating {request.args.get("username")} for {username}')
             username = request.args.get('username')
+
+    logger.info(f'updating {username}')
 
     user_obj = database.get_user(username)
 
@@ -73,6 +80,7 @@ def post_user(username):
                 }), 400
 
             if user_obj.check_password(request_json['current_password']):
+                logger.info(f'password updated for {username}')
                 user_obj.password = request_json['password']
             else:
                 return jsonify({
@@ -85,6 +93,7 @@ def post_user(username):
             'status': 'ok'
         }), 200
     else:
+        logger.error(f'user {username} not found')
         return jsonify({
             'message': f'user {username} not found',
             'status': 'error'
@@ -94,38 +103,45 @@ def post_user(username):
 def put_user(username):
     request_json = request.get_json()
 
+    logger.info(f'creating user for {username}')
+
     if 'username' not in request_json:
+        logger.error(f'username not found to register user for {username}')
         return jsonify({
             'message': 'no username provided',
             'status': 'error'
         }), 400
 
     if 'password' not in request_json:
+        logger.error(f'password not provided to register user for {username}')
         return jsonify({
             'message': 'no password provided',
             'status': 'error'
         }), 400
 
-    users = [i for i in db.collection(u'user').where(u'username', u'==', request_json.get('username')).stream()]
+    try:
+        database.create_user(username=request_json.get('username'),
+                             password=request_json.get('password'),
+                             user_type=User.Type[request_json.get('type', 'user')])
+        return jsonify({
+                'message': f'user {request_json.get("username")} created',
+                'status': 'ok'
+            }), 200
 
-    if len(users) > 0:
+    except FileExistsError:
+        logger.error(f'username {request_json["username"]} already registered')
         return jsonify({
             'message': f'username {request_json.get("username")} already registered',
             'status': 'error'
         }), 403
 
-    database.create_user(username=request_json.get('username'),
-                         password=request_json.get('password'),
-                         user_type=User.Type[request_json.get('type', 'user')])
-    return jsonify({
-            'message': f'user {request_json.get("username")} created',
-            'status': 'ok'
-        }), 200
-
 
 def delete_user(username):
     if request.args.get('username'):
+        logger.info(f'deleting {request.args.get("username")} for {username}')
         username = request.args.get('username')
+
+    logger.info(f'deleting {username}')
 
     user_obj = database.get_user(username)
 
@@ -138,6 +154,7 @@ def delete_user(username):
             'status': 'ok'
         }), 200
     else:
+        logger.info(f'user {username} not found')
         return jsonify({
             'message': f'user {username} not found',
             'status': 'error'
