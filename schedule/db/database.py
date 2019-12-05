@@ -46,7 +46,11 @@ def parse_user(user_ref=None, user_snapshot=None) -> User:
                 password=user_dict.get('password'),
                 db_ref=user_ref,
 
-                user_type=User.Type[user_dict.get('type')])
+                user_type=User.Type[user_dict.get('type')],
+
+                score=user_dict.get('score'),
+                user_state=User.UserState[user_dict.get('user_state')],
+                score_last_updated=user_dict.get('score_last_updated'))
 
 
 def create_user(username: str,
@@ -67,7 +71,10 @@ def create_user(username: str,
     user_info = {
         'username': username,
         'password': generate_password_hash(password),
-        'type': user_type.name
+        'type': user_type.name,
+        'score': 500,
+        'user_state': User.UserState.Inactive.name,
+        'score_last_updated': datetime.utcnow()
     }
 
     user_collection.document().set(user_info)
@@ -131,7 +138,8 @@ def parse_location(location_ref=None, location_snapshot=None) -> Location:
 
     return Location(location_id=location_dict.get('location_id'),
                     db_ref=location_ref,
-                    chargers=[parse_charger(charger_snapshot=i) for i in location_ref.collection('charger').stream()])
+                    chargers=[parse_charger(charger_snapshot=i) for i in location_ref.collection('charger').stream()],
+                    queue=[parse_user(user_ref=i) for i in location_dict.get('queue')])
 
 
 def create_location(location_id: str) -> None:
@@ -152,7 +160,8 @@ def create_location(location_id: str) -> None:
 
     # LOCATION DATABASE ENTITY MANIFEST
     location_info = {
-        'location_id': location_id
+        'location_id': location_id,
+        'queue': []
     }
 
     location_collection.document().set(location_info)
@@ -224,7 +233,8 @@ def parse_charger(charger_ref=None, charger_snapshot=None) -> Charger:
     return Charger(location_id=charger_dict.get('location_id'),
                    charger_id=charger_dict.get('charger_id'),
                    db_ref=charger_ref,
-                   active_session=charger_dict.get('active_session'))
+                   active_session=charger_dict.get('active_session'),
+                   state=Charger.State[charger_dict.get('state')])
 
 
 def create_charger(location_id: str, charger_id: str) -> None:
@@ -251,7 +261,8 @@ def create_charger(location_id: str, charger_id: str) -> None:
         charger_info = {
             'location_id': location_id,
             'charger_id': charger_id,
-            'active_session': None
+            'active_session': None,
+            'state': Charger.State.Available.name
         }
 
         charger_collection.document().set(charger_info)
@@ -369,6 +380,7 @@ def start_session(location_id: str, charger_id: str, user: User):
         'user': user.db_ref
     })
     charger.active_session = session_id
+    charger.state = Charger.State.Charging
 
 
 def get_new_session_id(location_id: str, charger_id: str):
@@ -428,7 +440,9 @@ def end_session(location_id: str, charger_id: str):
 
     if session is not None:
         session.end_time = datetime.utcnow()
-        get_charger(location_id, charger_id).active_session = None
+        charger = get_charger(location_id, charger_id)
+        charger.active_session = None
+        charger.state = Charger.State.Available
     else:
         logger.error(f'no active session at {location_id}:{charger_id}')
         raise FileNotFoundError('no session found')

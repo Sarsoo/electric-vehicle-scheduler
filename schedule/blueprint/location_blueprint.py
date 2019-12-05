@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from schedule.blueprint.decorators import admin_required, basic_auth
 import schedule.db.database as database
+from schedule.model.location import Charger
 
 import logging
 
@@ -182,7 +183,22 @@ def post_charger(location_id, charger_id, username):
 
     if charger_obj is not None:
 
-        # TODO add changes here
+        request_json = request.get_json()
+
+        if 'state' in request_json:
+            try:
+                new_state = Charger.State[request_json['state']]
+
+                charger_obj = database.get_charger(location_id, charger_id)
+                charger_obj.state = new_state
+
+                # TODO sending notifications
+
+            except KeyError:
+                return jsonify({
+                    'message': f'{request_json["state"]} is not a valid charger state',
+                    'status': 'error'
+                }), 400
 
         return jsonify({
             'message': f'charger {location_id}:{charger_id} updated',
@@ -281,8 +297,6 @@ def post_session(location_id, charger_id, username):
 
     if session_obj is not None:
 
-        # TODO add changes here
-
         return jsonify({
             'message': f'active session {location_id}:{charger_id} updated',
             'status': 'ok'
@@ -335,5 +349,68 @@ def delete_session(location_id, charger_id, username):
         logger.info(f'no session running at {location_id}:{charger_id}')
         return jsonify({
             'message': f'no session running at {location_id}:{charger_id}',
+            'status': 'error'
+        }), 404
+
+
+@blueprint.route('/<location_id>/queue', methods=['PUT', 'DELETE'])
+@basic_auth
+def queue(location_id, username=None):
+    if request.method == 'PUT':
+        return put_queue(location_id, username)
+    elif request.method == 'DELETE':
+        return delete_queue(location_id, username)
+
+
+def put_queue(location_id,  username):
+    logger.info(f'adding {username} to {location_id} queue')
+
+    location_obj = database.get_location(location_id)
+    user_obj = database.get_user(username)
+
+    if location_obj is not None:
+
+        location_obj.queue = location_obj.queue + [user_obj]
+
+        return jsonify({
+            'message': f'{username} queued for {location_id}',
+            'status': 'ok'
+        }), 200
+    else:
+        logger.error(f'location {location_id} not found')
+        return jsonify({
+            'message': f'location {location_id} not found',
+            'status': 'error'
+        }), 404
+
+
+def delete_queue(location_id,  username):
+    logger.info(f'adding {username} to {location_id} queue')
+
+    location_obj = database.get_location(location_id)
+    user_obj = database.get_user(username)
+
+    if location_obj is not None:
+
+        if username in [i.username for i in location_obj.queue]:
+
+            new_queue = location_obj.queue
+            new_queue.remove(user_obj)
+
+            location_obj.queue = new_queue
+
+            return jsonify({
+                'message': f'{username} removed from {location_id} queue',
+                'status': 'ok'
+            }), 200
+        else:
+            return jsonify({
+                'message': f'{username} not queued for {location_id}s',
+                'status': 'error'
+            }), 404
+    else:
+        logger.error(f'location {location_id} not found')
+        return jsonify({
+            'message': f'location {location_id} not found',
             'status': 'error'
         }), 404
