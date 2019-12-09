@@ -9,9 +9,9 @@ from schedule.model.user import User
 class Charger:
 
     class State(Enum):
-        Charging = 1
-        Full = 2
-        Available = 3
+        charging = 1
+        full = 2
+        available = 3
 
     def __init__(self,
                  location_id: str,

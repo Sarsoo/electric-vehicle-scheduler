@@ -20,10 +20,17 @@ logger = logging.getLogger(__name__)
 @basic_auth
 @admin_required
 def locations(username=None):
+    pulled = database.get_locations()
+
+    if locations is not None:
+        return jsonify({
+            'locations': [i.to_dict() for i in pulled],
+            'status': 'ok'
+        }), 200
     return jsonify({
-        'locations': database.get_locations(),
+        'message': 'no locations found',
         'status': 'ok'
-    }), 200
+    }), 503
 
 
 @blueprint.route('/<location_id>', methods=['GET'])
@@ -70,7 +77,7 @@ def post_location(location_id, username):
 
     if location_obj is not None:
 
-        # TODO add changes here
+        # TODO add manipulations here
 
         return jsonify({
             'message': f'location {location_id} updated',
@@ -102,6 +109,12 @@ def put_location(location_id, username):
             'message': f'location {location_id} already registered',
             'status': 'error'
         }), 403
+    except ValueError:
+        logger.error(f'illegal character present in {location_id}')
+        return jsonify({
+            'message': f'illegal character present in {location_id}',
+            'status': 'error'
+        }), 400
 
 
 def delete_location(location_id, username):
@@ -189,9 +202,7 @@ def post_charger(location_id, charger_id, username):
 
         if 'state' in request_json:
             try:
-                new_state = Charger.State[request_json['state']]
-
-                charger_obj = database.get_charger(location_id, charger_id)
+                new_state = Charger.State[request_json['state'].lower()]
                 charger_obj.state = new_state
 
                 # TODO sending notifications
@@ -232,6 +243,12 @@ def put_charger(location_id, charger_id, username):
             'message': f'charger {location_id}:{charger_id} already registered',
             'status': 'error'
         }), 403
+    except ValueError:
+        logger.error(f'illegal character present in {charger_id}')
+        return jsonify({
+            'message': f'illegal character present in {charger_id}',
+            'status': 'error'
+        }), 400
 
 
 def delete_charger(location_id, charger_id, username):
@@ -332,22 +349,25 @@ def put_session(location_id, charger_id, username):
             'message': f'session already running at {location_id}:{charger_id}',
             'status': 'error'
         }), 403
+    except FileNotFoundError:
+        logger.error(f'charger {location_id}:{charger_id} not found')
+        return jsonify({
+            'message': f'charger {location_id}:{charger_id} not found',
+            'status': 'error'
+        }), 404
 
 
 def delete_session(location_id, charger_id, username):
     logger.info(f'stopping session at {location_id}:{charger_id} for {username}')
 
-    session_obj = database.get_active_session(location_id, charger_id)
-
-    if session_obj is not None:
-
+    try:
         database.end_session(location_id, charger_id)
 
         return jsonify({
             'message': f'{location_id}:{charger_id} session stopped',
             'status': 'ok'
         }), 200
-    else:
+    except FileNotFoundError:
         logger.info(f'no session running at {location_id}:{charger_id}')
         return jsonify({
             'message': f'no session running at {location_id}:{charger_id}',

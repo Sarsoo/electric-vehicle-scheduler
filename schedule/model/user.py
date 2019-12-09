@@ -6,7 +6,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 restingScore = 500.0
-ddtInactive = 0.00694444444 #+/-25 per hour, tends towards restingScore (500)
+ddtInactive = 0.00694444444  # +/-25 per hour, tends towards restingScore (500)
 ddtIn_Queue = -ddtInactive
 ddtAssigned = -10*ddtInactive
 ddtConnected_Charging = ddtInactive
@@ -19,12 +19,12 @@ class User:
         admin = 2
         service = 3
 
-    class UserState(Enum):
-        Inactive = 1  # Not in a Queue or connected to a charger.
-        In_Queue = 2  # In a queue waiting for a charger.
-        Assigned = 3  # In a queue, assigned a charger, waiting to move the car.
-        Connected_Charging = 4  # Connected to a charger and charging.
-        Connected_Full = 5  # Connected to a charger, charge finished.
+    class State(Enum):
+        inactive = 1  # Not in a Queue or connected to a charger.
+        in_queue = 2  # In a queue waiting for a charger.
+        assigned = 3  # In a queue, assigned a charger, waiting to move the car.
+        connected_charging = 4  # Connected to a charger and charging.
+        connected_full = 5  # Connected to a charger, charge finished.
 
     def __init__(self,
                  username: str,
@@ -34,7 +34,7 @@ class User:
                  user_type: Type,
 
                  score: float,
-                 user_state: UserState,
+                 state: State,
                  score_last_updated: datetime):
         self.username = username
         self.db_ref = db_ref
@@ -43,14 +43,14 @@ class User:
         self._type = user_type
 
         self._score = score
-        self._user_state = user_state
+        self._state = state
         self._score_last_updated = score_last_updated
 
     def to_dict(self) -> dict:
         return {
             'username': self.username,
             'type': self.user_type.name,
-            'user_state': self.user_state.name
+            'state': self.state.name
         }
 
     def __eq__(self, other):
@@ -88,13 +88,13 @@ class User:
         self._score = value
 
     @property
-    def user_state(self):
-        return self._user_state
+    def state(self):
+        return self._state
 
-    @user_state.setter
-    def user_state(self, value: UserState):
-        db.update_user(self.username, {'user_state': value.name})
-        self._user_state = value
+    @state.setter
+    def state(self, value: State):
+        db.update_user(self.username, {'state': value.name})
+        self._state = value
 
     @property
     def score_last_updated(self):
@@ -107,8 +107,8 @@ class User:
 
     def update_score(self, time):
         time_diff = (time - self.score_last_updated).total_seconds()
-        #INACTIVE - score tends towards Resting Score
-        if self.user_state == self.UserState.Inactive:
+        # INACTIVE - score tends towards Resting Score
+        if self.state == self.State.inactive:
             if self.score > restingScore:
                 self.score = self.score - ddtInactive*time_diff
                 if self.score < restingScore:
@@ -117,18 +117,18 @@ class User:
                 self.score = self.score + ddtInactive*time_diff
                 if self.score > restingScore:
                     self.score = restingScore
-        #IN_QUEUE - score tends towards 0
-        elif self.user_state == self.UserState.In_Queue:
+        # IN_QUEUE - score tends towards 0
+        elif self.state == self.State.in_queue:
             self.score = self.score + ddtIn_Queue*time_diff
         if self.score < 0:
             self.score = 0
-        #ASSIGNED - Score increases rapidly!
-        #Think about implementing a timeout - ie user moves to Inactive if they don't plug in after say one hour.
-        #Timeout time should be parameterized, specific to each location.
-        elif self.user_state == self.UserState.Assigned:
+        # ASSIGNED - Score increases rapidly!
+        # Think about implementing a timeout - ie user moves to Inactive if they don't plug in after say one hour.
+        # Timeout time should be parameterized, specific to each location.
+        elif self.state == self.State.assigned:
             self.score = self.score + ddtAssigned*time_diff
-        #CHARGING - score tends towards Resting Score.
-        elif self.user_state == self.UserState.Connected_Charging:
+        # CHARGING - score tends towards Resting Score.
+        elif self.state == self.State.connected_charging:
             if self.score > restingScore:
                 self.score = self.score - ddtConnected_Charging*time_diff
                 if self.score < restingScore:
@@ -137,33 +137,33 @@ class User:
             self.score = self.score + ddtConnected_Charging*time_diff
             if self.score > restingScore:
                 self.score = restingScore
-        #FULL - Score increases rapidly!
-        #Penalises those who let their car stay connected for long periods of time.
-        #Think about implementing an offset to only start increasing score after a certain amount of time.
-        elif self.user_state == self.UserState.Connected_Full:
+        # FULL - Score increases rapidly!
+        # Penalises those who let their car stay connected for long periods of time.
+        # Think about implementing an offset to only start increasing score after a certain amount of time.
+        elif self.state == self.State.connected_full:
             self.score = self.score + ddtConnected_Full*time_diff
 
-    def makeInactive(self):
+    def make_inactive(self):
         self.update_score()
-        self.user_state = self.UserState.Inactive
+        self.state = self.State.inactive
         # BODY
 
-    def addToQueue(self):
+    def add_to_queue(self):
         self.update_score()
-        self.user_state = self.UserState.In_Queue
+        self.state = self.State.in_queue
         # BODY
 
-    def assignToCharger(self):
+    def assign_to_charger(self):
         self.update_score()
-        self.user_state = self.UserState.Assigned
+        self.state = self.State.assigned
         # BODY
 
-    def setToCharging(self):
+    def set_charging(self):
         self.update_score()
-        self.user_state = self.UserState.Connected_Charging
+        self.state = self.State.connected_charging
         # BODY
 
-    def setToFull(self):
+    def set_full(self):
         self.update_score()
-        self.user_state = self.UserState.Connected_Full
+        self.state = self.State.connected_full
         # BODY

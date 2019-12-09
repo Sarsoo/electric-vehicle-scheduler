@@ -49,7 +49,7 @@ def parse_user(user_ref=None, user_snapshot=None) -> User:
                 user_type=User.Type[user_dict.get('type')],
 
                 score=user_dict.get('score'),
-                user_state=User.UserState[user_dict.get('user_state')],
+                state=User.State[user_dict.get('state')],
                 score_last_updated=user_dict.get('score_last_updated'))
 
 
@@ -73,7 +73,7 @@ def create_user(username: str,
         'password': generate_password_hash(password),
         'type': user_type.name,
         'score': 500,
-        'user_state': User.UserState.Inactive.name,
+        'state': User.State.inactive.name,
         'score_last_updated': datetime.utcnow()
     }
 
@@ -262,7 +262,7 @@ def create_charger(location_id: str, charger_id: str) -> None:
             'location_id': location_id,
             'charger_id': charger_id,
             'active_session': None,
-            'state': Charger.State.Available.name
+            'state': Charger.State.available.name
         }
 
         charger_collection.document().set(charger_info)
@@ -363,7 +363,7 @@ def start_session(location_id: str, charger_id: str, user: User):
     charger = get_charger(location_id, charger_id)
     if charger is None:
         logger.error(f'charger {location_id}:{charger_id} not found')
-        return None
+        raise FileNotFoundError('charger not found')
 
     if charger.active_session is not None:
         logger.error(f'session already running on {location_id}:{charger_id}')
@@ -380,7 +380,7 @@ def start_session(location_id: str, charger_id: str, user: User):
         'user': user.db_ref
     })
     charger.active_session = session_id
-    charger.state = Charger.State.Charging
+    charger.state = Charger.State.charging
 
 
 def get_new_session_id(location_id: str, charger_id: str):
@@ -442,7 +442,7 @@ def end_session(location_id: str, charger_id: str):
         session.end_time = datetime.utcnow()
         charger = get_charger(location_id, charger_id)
         charger.active_session = None
-        charger.state = Charger.State.Available
+        charger.state = Charger.State.available
     else:
         logger.error(f'no active session at {location_id}:{charger_id}')
         raise FileNotFoundError('no session found')
