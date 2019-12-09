@@ -16,6 +16,7 @@
 
 service.json
 scratch.py
+report
 
 venv
 node_modules

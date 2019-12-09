@@ -12,7 +12,7 @@ from werkzeug.security import generate_password_hash
 db = firestore.Client()
 logger = logging.getLogger(__name__)
 
-illegal_characters = [' ', ':']
+illegal_characters = [' ', ':', '/']
 
 
 def get_user(username: str) -> Optional[User]:
