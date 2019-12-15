@@ -219,6 +219,11 @@ def queue_user(location_id: str, user: User):
 
     if location is not None:
         if user not in location.queue:
+
+            if user.state != User.State.inactive:
+                logger.error(f'{user} not inactive {location_id}')
+                raise SystemError('user not inactive')
+
             location.queue = location.queue + [user]
             user.state = User.State.in_queue
             location.tick_queue()
@@ -428,6 +433,10 @@ def start_session(location_id: str, charger_id: str, user: User):
         logger.error(f'session already running on {location_id}:{charger_id}')
         raise FileExistsError('session already running')
 
+    if user.state not in [User.State.in_queue, User.State.assigned]:
+        logger.error(f'{user} not queued or assigned {location_id}:{charger_id}')
+        raise SystemError('user not queued or assigned')
+
     session_id = get_new_session_id(location_id, charger_id)
 
     charger.db_ref.collection('session').document().set({
@@ -441,6 +450,7 @@ def start_session(location_id: str, charger_id: str, user: User):
     charger.active_session = session_id
     charger.state = Charger.State.pre_session
     remove_user_from_queue(location_id, user)
+    user.state = User.State.assigned
 
 
 def get_new_session_id(location_id: str, charger_id: str):

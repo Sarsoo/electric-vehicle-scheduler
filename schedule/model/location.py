@@ -91,6 +91,8 @@ class Charger:
         elif self.state == self.State.pre_session:
             if new_state == self.State.charging:
                 self.active_session_obj.user.state = User.State.connected_charging
+            elif new_state == self.State.available:
+                self.active_session_obj.user.state = User.State.inactive
             else:
                 raise SystemError(f'Cannot move from {self.state.name} to {new_state.name}')
         elif self.state == self.State.charging:
