@@ -117,16 +117,18 @@ Language
 \begin_layout Standard
 There are many languages well suited to writing HTTP servers from well establish
 ed ecosystems like PHP, Java and Ruby to newer environments such as Python
- and Javascript using Node.
- As a result of previous work and speed of prototyping Python was chosen.
+ and Javascript with Node.
+ An understanding of the language combined with high speed of prototyping
+ led Python to be chosen.
  
 \end_layout
 
 \begin_layout Standard
 Libraries for creating HTTP applications in Python typically implement the
  Web Server Gateway Interface (WSGI), an interface for passing web requests
- from the web server which hosts the application and the application itself.
- This allows any WSGI server to run any application using a WSGI framework.
+ from the web server which hosts the application to the application itself.
+ This theoretically allows any WSGI server to run any application written
+ using a WSGI framework.
 \end_layout
 
 \begin_layout Standard
@@ -134,17 +136,14 @@ Two of the most popular frameworks are Flask and Django.
 \end_layout
 
 \begin_layout Standard
-Django ties closely to a connected database and is 
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-finish framework comparison
-\end_layout
-
-\end_inset
-
-
+Django has a strong database abstraction layer and is opinionated in the
+ structure of a web application.
+ Flask however has a more minimalist structure, functioning more as a micro-fram
+ework that lightly wraps around both the Werkzeug library for a WSGI toolkit
+ and Jinja for template engine support.
+ It has no database layer or form validation, however it's un-opinionated
+ structure and flexibility led Flask to be selected.
+ 
 \end_layout
 
 \begin_layout Section
@@ -153,27 +152,27 @@ Infrastructure
 
 \begin_layout Standard
 Google Cloud Platform (GCP) is a platform of cloud computing products from
- Google offering services for compute, storage, databases, networking, AI
- and IOT.
+ Google offering services including compute, storage, databases, networking,
+ AI and IOT.
  Built upon the same infrastructure that hosts the public facing Google
- services, GCP is one of the largest and most feature rich platform of it's
- type operating in the same space as Amazon Web Services and Microsoft's
+ services, GCP is one of the largest and most feature rich platforms of
+ it's type operating in the same space as Amazon Web Services and Microsoft's
  Azure platform.
 \end_layout
 
 \begin_layout Standard
-With effective documentation and compelling free quotas for services combined
- with previous work with the platform, GCP was used to provide all the hosting
- needs for the project.
+With effective documentation and compelling free quotas combined with previous
+ experience with the platform, GCP was used to provide all the hosting needs
+ for the project without incurring any costs.
 \end_layout
 
 \begin_layout Subsection
-Hosting
+HTTP API Hosting
 \end_layout
 
 \begin_layout Standard
 The Flask HTTP server requires hosting in order to allow communications
- between the server and both the app and hardware.
+ between the server and both the app and hardware over the public internet.
  This can be done in various ways, one of which being to create a virtual
  machine on which WSGI applications can be started using a WSGI server like
  Gunicorn.
@@ -199,19 +198,42 @@ serverless
 \end_inset
 
 .
- There are many different ways to do this with the most serverless options
- being function as a service or FaaS, the AWS and GCP products being Lambda
- functions and Cloud functions respectively.
+ There are many different services using implementations the architecture
+ with the most popular being function-as-a-service or FaaS, the AWS and
+ GCP products being Lambda functions and Cloud functions respectively.
  FaaS services allow users to write and deploy individual functions or methods
- of source code to be run by a trigger.
- These triggers can be HTTP requests, database state changes and asynchronous
- queues.
+ of source code to be run by a trigger, functions are charged for per invocation.
+ These triggers can be HTTP requests allowing single functions to be mounted
+ on unique URLs, database state changes and asynchronous message queues.
  HTTP triggers allow users to write individual API endpoints as functions
- however for this project's requirements it would be too granular.
+ however for this project's requirements this would be too granular, FaaS
+ services instead proved useful for utility functions for the service.
 \end_layout
 
 \begin_layout Standard
-Platform as a service or PaaS is a similar 
+Platform as a service or PaaS is a similar architecture retaining many of
+ the advantages of serverless products.
+ It finds a compromise between virtual machine management and FaaS options
+ of before.
+ When thinking about serverless as a concept as opposed to the implementations
+ themselves, FaaS provides serverless hosting for individual methods of
+ source code, PaaS can be seen as serverless hosting of entire WSGI applications
+ when working in Python.
+ In this way advantages of serverless hosting such as reduced configuration
+ and high scalability are retained while allowing developers to create APIs
+ with WSGI applications as opposed to individual method or functions per
+ endpoint.
+\end_layout
+
+\begin_layout Standard
+One of the main advantages of both serverless and PaaS architecture is it's
+ ability to horizontally scale on demand.
+ Horizontal scaling describes a services ability to handle concurrent traffic,
+ typically scaling horizontally is achieved by running more instances of
+ an application at a time.
+ This is as opposed to vertical scaling which instead describes a services
+ ability to handle more traffic with the same resources, typically by making
+ each instance faster.
 \end_layout
 
 \begin_layout Subsubsection
@@ -219,19 +241,127 @@ Google App Engine
 \end_layout
 
 \begin_layout Standard
-Google App Engine is a 
+Google App Engine (GAE) is a PaaS product on GCP providing application hosting
+ for many different languages including Python.
+ GAE provides many powerful features that either require complex configuration
+ or are unfeasible with bare-metal solutions.
+\end_layout
+
+\begin_layout Standard
+For example GAE provides automatic instance scaling where as traffic to
+ the application increases, the hosting increases the number of instances
+ of the app in order to service the demand.
+ The scope of the GCP infrastructure gives effectively unlimited horizontal
+ scale to smaller services that would otherwise be unable to handle such
+ demand.
+\end_layout
+
+\begin_layout Standard
+GAE also makes using TLS security extremely easy.
+ With a manual hosting set-up, TLS security can be included by attaching
+ a certificate to the hosting web server, either purchased from a certificate
+ authority such as Verisign or for free with one generated by Let's Encrypt.
+ It is also advisable to include a rule within the web server in order to
+ redirect unencrypted HTTP traffic on port 80 to encrypted HTTPS traffic
+ on port 443.
+\end_layout
+
+\begin_layout Standard
+App Engine includes TLS security with a Let's Encrypt certificate as standard
+ and within the deployment configuration automatic redirects from HTTP to
+ HTTPS can be added with one line.
+ These two features make development and deployment fast and secure.
 \end_layout
 
 \begin_layout Subsection
-Firestore
+Database
+\end_layout
+
+\begin_layout Standard
+GCP has many options for database services depending on the requirements.
+ For both SQL and NoSQL, GCP has databases designed to operate at different
+ scales and with different features.
+ For example, Cloud SQL offers managed MySQL, PostgreSQL and SQL server
+ instances with ultra low latency for smaller scale use but Cloud Spanner
+ offers scalable SQL instances designed to be highly consistent at a global
+ scale.
+ 
+\end_layout
+
+\begin_layout Standard
+Equally, for NoSQL there are two main options.
+ Cloud Bigtable offers global scale NoSQL database instances able to handle
+ petabyte sized datasets designed for analytical big data workloads.
+ The other option is Cloud Firestore, a new service from GCP under the Firebase
+ brand banner.
+ 
+\end_layout
+
+\begin_layout Standard
+Firestore is also rated for global use and has a few key features that made
+ it the ideal database for this project.
+ First, being marketed as the flagship NoSQL product, Firestore has key
+ integrations with the rest of the GCP services, for example Cloud Functions
+ can be triggered directly by changes within the database and Firebase provides
+ authenticated access to the data from within mobile applications.
+\end_layout
+
+\begin_layout Standard
+Firestore is also highly scalable and consistent as a result of it's serverless
+ architecture.
+ For these reasons Firestore was chosen to host the application data for
+ this service.
 \end_layout
 
 \begin_layout Subsection
-Firebase
+Mobile Notifications
 \end_layout
 
-\begin_layout Section
-Flask Server
+\begin_layout Subsection
+Scheduling
+\end_layout
+
+\begin_layout Subsection
+Cloud Pub/Sub
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename cloud-structure.png
+	lyxscale 30
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Architecture of Google Cloud Platform services
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -275,6 +405,45 @@ name "fig:class-diagram"
 
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Flask Server
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename api-map.png
+	lyxscale 30
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Visualisation of API endpoints with example fully qualified route
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Plain Layout
 
 \end_layout
@@ -293,7 +462,20 @@ Authentication
 status open
 
 \begin_layout Plain Layout
-basic auth
+basic auth during testing
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+key based auth
 \end_layout
 
 \end_inset
