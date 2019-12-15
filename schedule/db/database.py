@@ -212,6 +212,44 @@ def delete_location(location_id: str) -> None:
         logger.error('no location returned')
 
 
+def queue_user(location_id: str, user: User):
+    logger.debug(f'queuing {user} at {location_id}')
+
+    location = get_location(location_id)
+
+    if location is not None:
+        if user not in location.queue:
+            location.queue = location.queue + [user]
+            user.state = User.State.in_queue
+            location.tick_queue()
+        else:
+            logger.error(f'{user} already queued at {location_id}')
+            raise KeyError(f'{user} already queued at {location_id}')
+    else:
+        logger.error(f'{location_id} not found')
+        raise FileNotFoundError(f'{location_id} not found')
+
+
+def remove_user_from_queue(location_id: str, user: User):
+    logger.debug(f'removing {user} from queue at {location_id}')
+
+    location = get_location(location_id)
+
+    if location is not None:
+        if user in location.queue:
+            new_queue = location.queue
+            new_queue.remove(user)
+            location.queue = new_queue
+
+            user.state = User.State.inactive
+        else:
+            logger.error(f'{user} not queued at {location_id}')
+            raise KeyError(f'{user} not queued at {location_id}')
+    else:
+        logger.error(f'{location_id} not found')
+        raise FileNotFoundError(f'{location_id} not found')
+
+
 def get_chargers(location_id: str) -> Optional[List[Charger]]:
 
     location = get_location(location_id)
@@ -401,7 +439,8 @@ def start_session(location_id: str, charger_id: str, user: User):
         'user': user.db_ref
     })
     charger.active_session = session_id
-    charger.state = Charger.State.charging
+    charger.state = Charger.State.pre_session
+    remove_user_from_queue(location_id, user)
 
 
 def get_new_session_id(location_id: str, charger_id: str):
@@ -462,8 +501,9 @@ def end_session(location_id: str, charger_id: str):
     if session is not None:
         session.end_time = datetime.utcnow()
         charger = get_charger(location_id, charger_id)
-        charger.active_session = None
         charger.state = Charger.State.available
+        charger.active_session = None
+        get_location(location_id).tick_queue()
     else:
         logger.error(f'no active session at {location_id}:{charger_id}')
         raise FileNotFoundError('no session found')

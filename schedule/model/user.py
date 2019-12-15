@@ -62,6 +62,9 @@ class User:
     def __eq__(self, other):
         return isinstance(other, User) and other.username == self.username
 
+    def __str__(self):
+        return self.username
+
     def refresh_access_token(self):
         self.access_token = db.get_new_access_token()
 
@@ -110,7 +113,7 @@ class User:
         return self._score_last_updated
 
     @score_last_updated.setter
-    def score_last_updated(self, value: float):
+    def score_last_updated(self, value: datetime):
         db.update_user(self.username, {'score_last_updated': value})
         self._score_last_updated = value
 
@@ -132,7 +135,8 @@ class User:
         db.update_user(self.username, {'access_token_last_refreshed': value})
         self._access_token_last_refreshed = value
 
-    def update_score(self, time):
+    def update_score(self, time: datetime):
+        self.score_last_updated = time
         time_diff = (time - self.score_last_updated).total_seconds()
         # INACTIVE - score tends towards Resting Score
         if self.state == self.State.inactive:
@@ -169,28 +173,3 @@ class User:
         # Think about implementing an offset to only start increasing score after a certain amount of time.
         elif self.state == self.State.connected_full:
             self.score = self.score + ddtConnected_Full*time_diff
-
-    def make_inactive(self):
-        self.update_score()
-        self.state = self.State.inactive
-        # BODY
-
-    def add_to_queue(self):
-        self.update_score()
-        self.state = self.State.in_queue
-        # BODY
-
-    def assign_to_charger(self):
-        self.update_score()
-        self.state = self.State.assigned
-        # BODY
-
-    def set_charging(self):
-        self.update_score()
-        self.state = self.State.connected_charging
-        # BODY
-
-    def set_full(self):
-        self.update_score()
-        self.state = self.State.connected_full
-        # BODY

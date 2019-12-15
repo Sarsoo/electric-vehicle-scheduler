@@ -59,7 +59,6 @@ def get_token_user():
 def basic_auth(func):
     @functools.wraps(func)
     def basic_auth_wrapper(*args, **kwargs):
-        print(request.headers)
         basic_auth_user = get_basic_auth_user()
         if basic_auth_user is not None:
             return func(current_user=basic_auth_user, *args, **kwargs)
@@ -89,7 +88,7 @@ def admin_required(func):
         current_user = kwargs.get('current_user')
 
         if current_user is not None:
-            if current_user.user_type == current_user.Type.admin:
+            if current_user.user_type in [current_user.Type.admin, current_user.Type.service]:
                 return func(*args, **kwargs)
             else:
                 logger.warning(f'{current_user.username} not authorized')
