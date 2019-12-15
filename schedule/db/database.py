@@ -1,5 +1,6 @@
 from google.cloud import firestore
 import logging
+import random, string
 from datetime import datetime
 from typing import Optional, List
 
@@ -13,6 +14,21 @@ db = firestore.Client()
 logger = logging.getLogger(__name__)
 
 illegal_characters = [' ', ':', '/']
+
+
+def get_new_access_token():
+    prospective_key = ''.join(random.choices(string.ascii_letters + string.digits, k=30))
+    if prospective_key not in [i.access_token for i in get_users()]:
+        return prospective_key
+    else:
+        return get_new_access_token()
+
+
+def get_users():
+    logger.debug('getting users')
+
+    users = [i for i in db.collection(u'user').stream()]
+    return [parse_user(user_snapshot=i) for i in users]
 
 
 def get_user(username: str) -> Optional[User]:
@@ -50,7 +66,10 @@ def parse_user(user_ref=None, user_snapshot=None) -> User:
 
                 score=user_dict.get('score'),
                 state=User.State[user_dict.get('state')],
-                score_last_updated=user_dict.get('score_last_updated'))
+                score_last_updated=user_dict.get('score_last_updated'),
+
+                access_token=user_dict.get('access_token'),
+                access_token_last_refreshed=user_dict.get('access_token_last_refreshed'))
 
 
 def create_user(username: str,
@@ -74,7 +93,9 @@ def create_user(username: str,
         'type': user_type.name,
         'score': 500,
         'state': User.State.inactive.name,
-        'score_last_updated': datetime.utcnow()
+        'score_last_updated': datetime.utcnow(),
+        'access_token': get_new_access_token(),
+        'access_token_last_refreshed': datetime.utcnow()
     }
 
     user_collection.document().set(user_info)

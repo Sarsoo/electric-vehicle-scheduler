@@ -5,7 +5,7 @@ import logging
 from google.cloud import firestore
 
 import schedule.db.database as database
-from schedule.blueprint.decorators import basic_auth, admin_required
+from schedule.blueprint.decorators import basic_auth, admin_required, url_arg_username_override, access_token
 from schedule.model.user import User
 
 blueprint = Blueprint('bp_user', __name__)
@@ -15,60 +15,52 @@ logger = logging.getLogger(__name__)
 
 
 @blueprint.route('', methods=['GET', 'POST'])
-@basic_auth
-def user(username=None):
+@access_token
+@url_arg_username_override
+def user(current_user=None):
     if request.method == 'GET':
-        return get_user(username)
+        return get_user(current_user)
     elif request.method == 'POST':
-        return post_user(username)
+        return post_user(current_user)
 
 
-@blueprint.route('', methods=['PUT', 'DELETE'])
-@basic_auth
+@blueprint.route('', methods=['PUT'])
+@access_token
 @admin_required
-def user_restricted(username=None):
+def user_restricted(current_user=None):
     if request.method == 'PUT':
-        return put_user(username)
-    elif request.method == 'DELETE':
-        return delete_user(username)
+        return put_user(current_user)
 
 
-def get_user(username: str):
+@blueprint.route('', methods=['DELETE'])
+@access_token
+@admin_required
+@url_arg_username_override
+def user_restricted_with_override(current_user=None):
+    if request.method == 'DELETE':
+        return delete_user(current_user)
 
-    if database.get_user(username).user_type == User.Type.admin:
-        if request.args.get('username'):
-            logger.info(f'getting {request.args.get("username")} for {username}')
-            username = request.args.get('username')
 
-    logger.info(f'getting {username}')
+def get_user(current_user):
+    logger.info(f'getting {current_user.username}')
 
-    user_obj = database.get_user(username)
-
-    if user_obj is not None:
+    if current_user is not None:
         return jsonify({
-            'user': user_obj.to_dict(),
+            'user': current_user.to_dict(),
             'status': 'ok'
         }), 200
     else:
-        logger.error(f'user {username} not found')
+        logger.error(f'user {current_user.username} not found')
         return jsonify({
-            'message': f'user {username} not found',
+            'message': f'user {current_user.username} not found',
             'status': 'error'
         }), 404
 
 
-def post_user(username):
+def post_user(current_user):
+    logger.info(f'updating {current_user.username}')
 
-    if database.get_user(username).user_type == User.Type.admin:
-        if request.args.get('username'):
-            logger.info(f'updating {request.args.get("username")} for {username}')
-            username = request.args.get('username')
-
-    logger.info(f'updating {username}')
-
-    user_obj = database.get_user(username)
-
-    if user_obj is not None:
+    if current_user is not None:
 
         request_json = request.get_json()
 
@@ -79,9 +71,9 @@ def post_user(username):
                     'status': 'error'
                 }), 400
 
-            if user_obj.check_password(request_json['current_password']):
-                logger.info(f'password updated for {username}')
-                user_obj.password = request_json['password']
+            if current_user.check_password(request_json['current_password']):
+                logger.info(f'password updated for {current_user.username}')
+                current_user.password = request_json['password']
             else:
                 return jsonify({
                     'message': 'wrong password, no other updates made',
@@ -89,31 +81,31 @@ def post_user(username):
                 }), 400
 
         return jsonify({
-            'message': f'user {username} updated',
+            'message': f'user {current_user.username} updated',
             'status': 'ok'
         }), 200
     else:
-        logger.error(f'user {username} not found')
+        logger.error(f'user {current_user.username} not found')
         return jsonify({
-            'message': f'user {username} not found',
+            'message': f'user {current_user.username} not found',
             'status': 'error'
         }), 404
 
 
-def put_user(username):
+def put_user(current_user):
     request_json = request.get_json()
 
-    logger.info(f'creating user for {username}')
+    logger.info(f'creating user for {current_user.username}')
 
     if 'username' not in request_json:
-        logger.error(f'username not found to register user for {username}')
+        logger.error(f'username not found to register user for {current_user.username}')
         return jsonify({
             'message': 'no username provided',
             'status': 'error'
         }), 400
 
     if 'password' not in request_json:
-        logger.error(f'password not provided to register user for {username}')
+        logger.error(f'password not provided to register user for {current_user.username}')
         return jsonify({
             'message': 'no password provided',
             'status': 'error'
@@ -136,55 +128,20 @@ def put_user(username):
         }), 403
 
 
-def delete_user(username):
-    if request.args.get('username'):
-        logger.info(f'deleting {request.args.get("username")} for {username}')
-        username = request.args.get('username')
+def delete_user(current_user):
+    logger.info(f'deleting {current_user.username}')
 
-    logger.info(f'deleting {username}')
+    if current_user is not None:
 
-    user_obj = database.get_user(username)
-
-    if user_obj is not None:
-
-        user_obj.db_ref.delete()
+        current_user.db_ref.delete()
 
         return jsonify({
-            'message': f'{username} deleted',
+            'message': f'{current_user.username} deleted',
             'status': 'ok'
         }), 200
     else:
-        logger.info(f'user {username} not found')
+        logger.info(f'user {current_user.username} not found')
         return jsonify({
-            'message': f'user {username} not found',
+            'message': f'user {current_user.username} not found',
             'status': 'error'
         }), 404
-
-
-# @blueprint.route('/vehicle', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def vehicle(username=None):
-
-    if request.method == 'GET':
-        return get_vehicle(username)
-    elif request.method == 'POST':
-        return post_vehicle(username)
-    elif request.method == 'PUT':
-        return put_vehicle(username)
-    elif request.method == 'DELETE':
-        return delete_vehicle(username)
-
-
-def get_vehicle(username):
-    return None
-
-
-def post_vehicle(username):
-    return None
-
-
-def put_vehicle(username):
-    return None
-
-
-def delete_vehicle(username):
-    return None

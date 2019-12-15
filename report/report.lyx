@@ -86,8 +86,219 @@ todonotes
 
 \begin_body
 
-\begin_layout Part*
-Cloud Backend
+\begin_layout Title
+Cloud Back-End
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\begin_inset VSpace bigskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the front-end/back-end model the purpose of a back-end is to act as the
+ data access layer (DAL) for a service.
+ Comparing this with the client-server model the front-end is typically
+ the client with the server acting as the back-end.
+\end_layout
+
+\begin_layout Section
+Language
+\end_layout
+
+\begin_layout Standard
+There are many languages well suited to writing HTTP servers from well establish
+ed ecosystems like PHP, Java and Ruby to newer environments such as Python
+ and Javascript using Node.
+ As a result of previous work and speed of prototyping Python was chosen.
+ 
+\end_layout
+
+\begin_layout Standard
+Libraries for creating HTTP applications in Python typically implement the
+ Web Server Gateway Interface (WSGI), an interface for passing web requests
+ from the web server which hosts the application and the application itself.
+ This allows any WSGI server to run any application using a WSGI framework.
+\end_layout
+
+\begin_layout Standard
+Two of the most popular frameworks are Flask and Django.
+\end_layout
+
+\begin_layout Standard
+Django ties closely to a connected database and is 
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+finish framework comparison
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Infrastructure
+\end_layout
+
+\begin_layout Standard
+Google Cloud Platform (GCP) is a platform of cloud computing products from
+ Google offering services for compute, storage, databases, networking, AI
+ and IOT.
+ Built upon the same infrastructure that hosts the public facing Google
+ services, GCP is one of the largest and most feature rich platform of it's
+ type operating in the same space as Amazon Web Services and Microsoft's
+ Azure platform.
+\end_layout
+
+\begin_layout Standard
+With effective documentation and compelling free quotas for services combined
+ with previous work with the platform, GCP was used to provide all the hosting
+ needs for the project.
+\end_layout
+
+\begin_layout Subsection
+Hosting
+\end_layout
+
+\begin_layout Standard
+The Flask HTTP server requires hosting in order to allow communications
+ between the server and both the app and hardware.
+ This can be done in various ways, one of which being to create a virtual
+ machine on which WSGI applications can be started using a WSGI server like
+ Gunicorn.
+ While this presents the most manual set-up requiring careful Linux administrati
+on to create a secure public facing server, the growth of cloud computing
+ platforms has removed the requirement for such overhead.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Serverless and PaaS
+\end_layout
+
+\begin_layout Standard
+Serverless computing describes a new type of cloud service architecture
+ that abstracts away much of the required administration, aiming to make
+ the user experience feel 
+\begin_inset Quotes eld
+\end_inset
+
+serverless
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There are many different ways to do this with the most serverless options
+ being function as a service or FaaS, the AWS and GCP products being Lambda
+ functions and Cloud functions respectively.
+ FaaS services allow users to write and deploy individual functions or methods
+ of source code to be run by a trigger.
+ These triggers can be HTTP requests, database state changes and asynchronous
+ queues.
+ HTTP triggers allow users to write individual API endpoints as functions
+ however for this project's requirements it would be too granular.
+\end_layout
+
+\begin_layout Standard
+Platform as a service or PaaS is a similar 
+\end_layout
+
+\begin_layout Subsubsection
+Google App Engine
+\end_layout
+
+\begin_layout Standard
+Google App Engine is a 
+\end_layout
+
+\begin_layout Subsection
+Firestore
+\end_layout
+
+\begin_layout Subsection
+Firebase
+\end_layout
+
+\begin_layout Section
+Flask Server
+\end_layout
+
+\begin_layout Section
+Data Model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename class diagram.png
+	lyxscale 30
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Class diagram for data model
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:class-diagram"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Authentication
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+basic auth
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body

@@ -5,7 +5,7 @@ import logging
 from google.cloud import firestore
 
 import schedule.db.database as database
-from schedule.model.user import User
+from schedule.blueprint.decorators import access_token
 
 blueprint = Blueprint('bp_auth', __name__)
 db = firestore.Client()
@@ -33,19 +33,26 @@ def login():
 
     user = database.get_user(request_json['username'])
     if user.check_password(request_json['password']):
+        if user.access_token is None:
+            user.refresh_access_token()
+
         return jsonify({
-            'message': f'password match',
+            'message': 'password match',
+            'token': user.access_token,
             'status': 'ok'
         }), 200
     else:
         return jsonify({
-            'message': f'password mismatch',
+            'message': 'password mismatch',
             'status': 'error'
         }), 401
 
 
 @blueprint.route('/logout', methods=['GET'])
-def logout():
-
-    response = {}
-    return jsonify(response), 200
+@access_token
+def logout(current_user=None):
+    current_user.access_token = None
+    return jsonify({
+        'message': 'user logged out',
+        'status': 'ok'
+    }), 200

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @blueprint.route('', methods=['GET'])
 @basic_auth
 @admin_required
-def locations(username=None):
+def locations(current_user=None):
     pulled = database.get_locations()
 
     if locations is not None:
@@ -35,25 +35,25 @@ def locations(username=None):
 
 @blueprint.route('/<location_id>', methods=['GET'])
 @basic_auth
-def location(location_id, username=None):
+def location(location_id, current_user=None):
     if request.method == 'GET':
-        return get_location(location_id, username)
+        return get_location(location_id, current_user)
 
 
 @blueprint.route('/<location_id>', methods=['POST', 'PUT', 'DELETE'])
 @basic_auth
 @admin_required
-def location_restricted(location_id, username=None):
+def location_restricted(location_id, current_user=None):
     if request.method == 'POST':
-        return post_location(location_id, username)
+        return post_location(location_id, current_user)
     elif request.method == 'PUT':
-        return put_location(location_id, username)
+        return put_location(location_id, current_user)
     elif request.method == 'DELETE':
-        return delete_location(location_id, username)
+        return delete_location(location_id, current_user)
 
 
-def get_location(location_id, username):
-    logger.info(f'getting {location_id} for {username}')
+def get_location(location_id, current_user):
+    logger.info(f'getting {location_id} for {current_user.username}')
 
     location_obj = database.get_location(location_id)
 
@@ -70,8 +70,8 @@ def get_location(location_id, username):
         }), 404
 
 
-def post_location(location_id, username):
-    logger.info(f'updating {location_id} for {username}')
+def post_location(location_id, current_user):
+    logger.info(f'updating {location_id} for {current_user.username}')
 
     location_obj = database.get_location(location_id)
 
@@ -91,10 +91,10 @@ def post_location(location_id, username):
         }), 404
 
 
-def put_location(location_id, username):
+def put_location(location_id, current_user):
     request_json = request.get_json()
 
-    logger.info(f'creating location for {username}')
+    logger.info(f'creating location for {current_user.username}')
 
     try:
         database.create_location(location_id)
@@ -117,8 +117,8 @@ def put_location(location_id, username):
         }), 400
 
 
-def delete_location(location_id, username):
-    logger.info(f'deleting {location_id} for {username}')
+def delete_location(location_id, current_user):
+    logger.info(f'deleting {location_id} for {current_user.username}')
 
     location_obj = database.get_location(location_id)
 
@@ -140,7 +140,7 @@ def delete_location(location_id, username):
 
 @blueprint.route('/<location_id>/charger', methods=['GET'])
 @basic_auth
-def chargers(location_id, username=None):
+def chargers(location_id, current_user=None):
     location_obj = database.get_location(location_id)
     if location_obj is not None:
         return jsonify({
@@ -156,25 +156,25 @@ def chargers(location_id, username=None):
 
 @blueprint.route('/<location_id>/charger/<charger_id>', methods=['GET'])
 @basic_auth
-def charger(location_id, charger_id, username=None):
+def charger(location_id, charger_id, current_user=None):
     if request.method == 'GET':
-        return get_charger(location_id, charger_id, username)
+        return get_charger(location_id, charger_id, current_user)
 
 
 @blueprint.route('/<location_id>/charger/<charger_id>', methods=['POST', 'PUT', 'DELETE'])
 @basic_auth
 @admin_required
-def charger_restricted(location_id, charger_id, username=None):
+def charger_restricted(location_id, charger_id, current_user=None):
     if request.method == 'POST':
-        return post_charger(location_id, charger_id, username)
+        return post_charger(location_id, charger_id, current_user)
     elif request.method == 'PUT':
-        return put_charger(location_id, charger_id, username)
+        return put_charger(location_id, charger_id, current_user)
     elif request.method == 'DELETE':
-        return delete_charger(location_id, charger_id, username)
+        return delete_charger(location_id, charger_id, current_user)
 
 
-def get_charger(location_id, charger_id, username):
-    logger.info(f'getting {location_id}:{charger_id} for {username}')
+def get_charger(location_id, charger_id, current_user):
+    logger.info(f'getting {location_id}:{charger_id} for {current_user.username}')
 
     charger_obj = database.get_charger(location_id, charger_id)
 
@@ -191,8 +191,8 @@ def get_charger(location_id, charger_id, username):
         }), 404
 
 
-def post_charger(location_id, charger_id, username):
-    logger.info(f'updating {location_id}:{charger_id} for {username}')
+def post_charger(location_id, charger_id, current_user):
+    logger.info(f'updating {location_id}:{charger_id} for {current_user.username}')
 
     charger_obj = database.get_charger(location_id, charger_id)
 
@@ -225,10 +225,10 @@ def post_charger(location_id, charger_id, username):
         }), 404
 
 
-def put_charger(location_id, charger_id, username):
+def put_charger(location_id, charger_id, current_user):
     request_json = request.get_json()
 
-    logger.info(f'creating {location_id}:{charger_id} charger for {username}')
+    logger.info(f'creating {location_id}:{charger_id} charger for {current_user.username}')
 
     try:
         database.create_charger(location_id, charger_id)
@@ -251,8 +251,8 @@ def put_charger(location_id, charger_id, username):
         }), 400
 
 
-def delete_charger(location_id, charger_id, username):
-    logger.info(f'deleting {location_id}:{charger_id} for {username}')
+def delete_charger(location_id, charger_id, current_user):
+    logger.info(f'deleting {location_id}:{charger_id} for {current_user.username}')
 
     charger_obj = database.get_charger(location_id, charger_id)
 
@@ -274,25 +274,25 @@ def delete_charger(location_id, charger_id, username):
 
 @blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['GET'])
 @basic_auth
-def session(location_id, charger_id, username=None):
+def session(location_id, charger_id, current_user=None):
     if request.method == 'GET':
-        return get_session(location_id, charger_id, username)
+        return get_session(location_id, charger_id, current_user)
 
 
 @blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['POST', 'PUT', 'DELETE'])
 @basic_auth
 @admin_required
-def session_restricted(location_id, charger_id, username=None):
+def session_restricted(location_id, charger_id, current_user=None):
     if request.method == 'POST':
-        return post_session(location_id, charger_id, username)
+        return post_session(location_id, charger_id, current_user)
     elif request.method == 'PUT':
-        return put_session(location_id, charger_id, username)
+        return put_session(location_id, charger_id, current_user)
     elif request.method == 'DELETE':
-        return delete_session(location_id, charger_id, username)
+        return delete_session(location_id, charger_id, current_user)
 
 
-def get_session(location_id, charger_id, username):
-    logger.info(f'getting {location_id}:{charger_id} session for {username}')
+def get_session(location_id, charger_id, current_user):
+    logger.info(f'getting {location_id}:{charger_id} session for {current_user.username}')
 
     session_obj = database.get_active_session(location_id, charger_id)
 
@@ -309,8 +309,8 @@ def get_session(location_id, charger_id, username):
         }), 404
 
 
-def post_session(location_id, charger_id, username):
-    logger.info(f'updating {location_id}:{charger_id} session for {username}')
+def post_session(location_id, charger_id, current_user):
+    logger.info(f'updating {location_id}:{charger_id} session for {current_user.username}')
 
     session_obj = database.get_active_session(location_id, charger_id)
 
@@ -328,16 +328,16 @@ def post_session(location_id, charger_id, username):
         }), 404
 
 
-def put_session(location_id, charger_id, username):
+def put_session(location_id, charger_id, current_user):
     request_json = request.get_json()
 
     if request_json is not None and 'username' in request_json:
         username = request_json.get('username')
 
-    logger.info(f'starting session at {location_id}:{charger_id} for {username}')
+    logger.info(f'starting session at {location_id}:{charger_id} for {current_user.username}')
 
     try:
-        database.start_session(location_id, charger_id, database.get_user(username))
+        database.start_session(location_id, charger_id, current_user)
         return jsonify({
             'message': f'session started at {location_id}:{charger_id}',
             'status': 'ok'
@@ -357,8 +357,8 @@ def put_session(location_id, charger_id, username):
         }), 404
 
 
-def delete_session(location_id, charger_id, username):
-    logger.info(f'stopping session at {location_id}:{charger_id} for {username}')
+def delete_session(location_id, charger_id, current_user):
+    logger.info(f'stopping session at {location_id}:{charger_id} for {current_user.username}')
 
     try:
         database.end_session(location_id, charger_id)
@@ -377,25 +377,24 @@ def delete_session(location_id, charger_id, username):
 
 @blueprint.route('/<location_id>/queue', methods=['PUT', 'DELETE'])
 @basic_auth
-def queue(location_id, username=None):
+def queue(location_id, current_user=None):
     if request.method == 'PUT':
-        return put_queue(location_id, username)
+        return put_queue(location_id, current_user)
     elif request.method == 'DELETE':
-        return delete_queue(location_id, username)
+        return delete_queue(location_id, current_user)
 
 
-def put_queue(location_id,  username):
-    logger.info(f'adding {username} to {location_id} queue')
+def put_queue(location_id,  current_user):
+    logger.info(f'adding {current_user.username} to {location_id} queue')
 
     location_obj = database.get_location(location_id)
-    user_obj = database.get_user(username)
 
     if location_obj is not None:
 
-        location_obj.queue = location_obj.queue + [user_obj]
+        location_obj.queue = location_obj.queue + [current_user]
 
         return jsonify({
-            'message': f'{username} queued for {location_id}',
+            'message': f'{current_user.username} queued for {location_id}',
             'status': 'ok'
         }), 200
     else:
@@ -406,28 +405,27 @@ def put_queue(location_id,  username):
         }), 404
 
 
-def delete_queue(location_id,  username):
-    logger.info(f'adding {username} to {location_id} queue')
+def delete_queue(location_id,  current_user):
+    logger.info(f'adding {current_user.username} to {location_id} queue')
 
     location_obj = database.get_location(location_id)
-    user_obj = database.get_user(username)
 
     if location_obj is not None:
 
-        if username in [i.username for i in location_obj.queue]:
+        if current_user.username in [i.username for i in location_obj.queue]:
 
             new_queue = location_obj.queue
-            new_queue.remove(user_obj)
+            new_queue.remove(current_user)
 
             location_obj.queue = new_queue
 
             return jsonify({
-                'message': f'{username} removed from {location_id} queue',
+                'message': f'{current_user.username} removed from {location_id} queue',
                 'status': 'ok'
             }), 200
         else:
             return jsonify({
-                'message': f'{username} not queued for {location_id}s',
+                'message': f'{current_user.username} not queued for {location_id}s',
                 'status': 'error'
             }), 404
     else:

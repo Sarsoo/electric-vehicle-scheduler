@@ -35,7 +35,10 @@ class User:
 
                  score: float,
                  state: State,
-                 score_last_updated: datetime):
+                 score_last_updated: datetime,
+
+                 access_token: str,
+                 access_token_last_refreshed: datetime):
         self.username = username
         self.db_ref = db_ref
 
@@ -46,6 +49,9 @@ class User:
         self._state = state
         self._score_last_updated = score_last_updated
 
+        self._access_token = access_token
+        self._access_token_last_refreshed = access_token_last_refreshed
+
     def to_dict(self) -> dict:
         return {
             'username': self.username,
@@ -55,6 +61,9 @@ class User:
 
     def __eq__(self, other):
         return isinstance(other, User) and other.username == self.username
+
+    def refresh_access_token(self):
+        self.access_token = db.get_new_access_token()
 
     @property
     def password(self):
@@ -104,6 +113,24 @@ class User:
     def score_last_updated(self, value: float):
         db.update_user(self.username, {'score_last_updated': value})
         self._score_last_updated = value
+
+    @property
+    def access_token(self):
+        return self._access_token
+
+    @access_token.setter
+    def access_token(self, value: float):
+        db.update_user(self.username, {'access_token': value})
+        self._access_token = value
+
+    @property
+    def access_token_last_refreshed(self):
+        return self._access_token_last_refreshed
+
+    @access_token_last_refreshed.setter
+    def access_token_last_refreshed(self, value: float):
+        db.update_user(self.username, {'access_token_last_refreshed': value})
+        self._access_token_last_refreshed = value
 
     def update_score(self, time):
         time_diff = (time - self.score_last_updated).total_seconds()
