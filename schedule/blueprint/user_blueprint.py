@@ -14,22 +14,22 @@ db = firestore.Client()
 logger = logging.getLogger(__name__)
 
 
-@blueprint.route('', methods=['GET', 'POST'])
+@blueprint.route('', methods=['GET', 'PUT'])
 @access_token
 @url_arg_username_override
 def user(current_user=None):
     if request.method == 'GET':
         return get_user(current_user)
-    elif request.method == 'POST':
-        return post_user(current_user)
+    elif request.method == 'PUT':
+        return put_user(current_user)
 
 
-@blueprint.route('', methods=['PUT'])
+@blueprint.route('', methods=['POST'])
 @access_token
 @admin_required
 def user_restricted(current_user=None):
-    if request.method == 'PUT':
-        return put_user(current_user)
+    if request.method == 'POST':
+        return post_user(current_user)
 
 
 @blueprint.route('', methods=['DELETE'])
@@ -57,7 +57,7 @@ def get_user(current_user):
         }), 404
 
 
-def post_user(current_user):
+def put_user(current_user):
     logger.info(f'updating {current_user.username}')
 
     if current_user is not None:
@@ -92,7 +92,7 @@ def post_user(current_user):
         }), 404
 
 
-def put_user(current_user):
+def post_user(current_user):
     request_json = request.get_json()
 
     logger.info(f'creating user for {current_user.username}')
