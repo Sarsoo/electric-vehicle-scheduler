@@ -814,16 +814,16 @@ Basic base64_encode(<username>:<password>)
 
 \begin_layout Standard
 Base64 encoding is a binary-to-text encoding method and is not a form of
- encryption or hashing, as such any agent with the content of the request
- can trivially get access to the cleartext user credentials.
+ encryption or hashing, any agent with the content of the request can trivially
+ get access to the cleartext user credentials.
  
 \end_layout
 
 \begin_layout Standard
-When ensuring, as this service does, that all requests at the API are encrypted
+When ensuring, as this service does, that all requests of the API are encrypted
  using TLS, then these credentials are secure in transit, however this is
  not the only attack surface which should be protected.
- It also requires the requesting agent to have access to the users cleartext
+ It also requires the requesting agent to have access to the user's cleartext
  password for inclusion every time which should be minimised as much as
  possible.
  There is inherent risk if each HTTP request includes the unencrypted user
