@@ -1,0 +1,6 @@
+21 oct - added skeleton for data model and api routes
+28 oct - implemented some user functionality
+15 nov - added plan for location routes
+4 dec - added auth and location/charger routes
+5 dec - added queue
+15 dec - added token auth, activated queue, added token refresh

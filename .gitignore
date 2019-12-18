@@ -1,7 +1,7 @@
 scratch.py
 service.json
 *.pdf
-*~
+*~*
 *#
 
 node_modules/

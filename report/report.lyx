@@ -90,6 +90,10 @@ todonotes
 Cloud Back-End
 \end_layout
 
+\begin_layout List of TODOs
+
+\end_layout
+
 \begin_layout Standard
 \begin_inset CommandInset toc
 LatexCommand tableofcontents
@@ -132,7 +136,23 @@ Libraries for creating HTTP applications in Python typically implement the
 \end_layout
 
 \begin_layout Standard
-Two of the most popular frameworks are Flask and Django.
+Two of the most popular frameworks are Flask
+\begin_inset CommandInset citation
+LatexCommand cite
+key "flask"
+literal "false"
+
+\end_inset
+
+ and Django
+\begin_inset CommandInset citation
+LatexCommand cite
+key "django"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -152,9 +172,16 @@ Infrastructure
 \end_layout
 
 \begin_layout Standard
-Google Cloud Platform (GCP) is a platform of cloud computing products from
- Google offering services including compute, storage, databases, networking,
- AI and IOT.
+Google Cloud Platform
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gcp"
+literal "false"
+
+\end_inset
+
+ (GCP) is a platform of cloud computing products from Google offering services
+ including compute, storage, databases, networking, AI and IOT.
  Built upon the same infrastructure that hosts the public facing Google
  services, GCP is one of the largest and most feature rich platforms of
  it's type operating in the same space as Amazon Web Services and Microsoft's
@@ -348,14 +375,17 @@ status open
 
 \begin_layout Plain Layout
 Architecture of Google Cloud Platform services
-\end_layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:gcp-services"
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Plain Layout
+\end_inset
+
 
 \end_layout
 
@@ -434,17 +464,19 @@ User
 Users have associated usernames and passwords for identification and authenticat
 ion.
  Usernames are the primary key differentiating objects and are case insensitive.
- Passwords are salted and hashed using the Werkzeug security functionality.
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-include hashing algorithm
-\end_layout
+ Passwords are salted and hashed using the Werkzeug security functionality,
+ for more information see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Passwords"
+plural "false"
+caps "false"
+noprefix "false"
 
 \end_inset
 
-
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -514,7 +546,7 @@ Charging Structure
 \end_layout
 
 \begin_layout Standard
-The layout for charging architecture defines two object modeling physical
+The layout for charging architecture defines two object modelling physical
  structure and a session object.
  A Location defines a physical location at which are charging stations.
  An office building with electric vehicle parking spaces is a Location as
@@ -596,7 +628,15 @@ Flask Server
 \end_layout
 
 \begin_layout Standard
-Flask is a lean Python web framework that provides flexibility and extensibility
+Flask
+\begin_inset CommandInset citation
+LatexCommand cite
+key "flask"
+literal "false"
+
+\end_inset
+
+ is a lean Python web framework that provides flexibility and extensibility
  for web server development.
  The framework is used by instantiating a Flask application and registering
  routes with the app object.
@@ -730,6 +770,95 @@ name "fig:api-route-map"
 Charging Structure Blueprint
 \end_layout
 
+\begin_layout Subsubsection
+Location
+\end_layout
+
+\begin_layout Standard
+Making a GET request at the /api/location endpoint responds with a list
+ of all of the available locations registered in the service.
+ Due to the security implications of having this information available,
+ only admin accounts can make this request.
+\end_layout
+
+\begin_layout Standard
+Following the location with a location ID in the form /api/location/<location_id
+> allows requests to be made about individual locations.
+ GET requests retrieve information about the location including the registered
+ chargers and the current queue.
+\end_layout
+
+\begin_layout Standard
+PUT and POST requests manipulate and create locations respectively.
+ Currently, however, there are no changes that can be made to a location
+ using the PUT method.
+ The DELETE method deletes a location, all of the PUT, POST and DELETE methods
+ require admin rights.
+\end_layout
+
+\begin_layout Subsubsection
+Queue
+\end_layout
+
+\begin_layout Standard
+The queue endpoint for a location allows the addition and removal of users
+ from a queue at a location.
+ The POST method adds the currently logged in user, as inferred from the
+ authentication credentials, to the queue at that location, The DELETE method
+ removes the same user from the queue.
+\end_layout
+
+\begin_layout Subsubsection
+Charger
+\end_layout
+
+\begin_layout Standard
+The /api/location/<location_id>/charger allows GET requests in order to
+ retrieve the list of registered chargers at that location.
+ Similar to the location endpoint this can then be sub-indexed by charger
+ ID in the following fashion
+\end_layout
+
+\begin_layout Quote
+/api/location/<location_id>/charger/<charger_id>
+\end_layout
+
+\begin_layout Standard
+and has the same implementations of HTTP methods.
+ Unlike the location endpoint the charger allows updates to be made to it's
+ state using the PUT method.
+ This is a critical part of the session life cycle and is a change received
+ by the charging units to indicate that charging has started or stopped.
+ The new state is entered as part of the JSON body of the request.
+ It is worth noting that charging sessions are not started or stopped by
+ making the associated state changes but instead via the session endpoint.
+ State changes in this fashion are instead for intra-session changes.
+ Similar to the location endpoint, write functions must be made by admin
+ accounts.
+\end_layout
+
+\begin_layout Subsubsection
+Session
+\end_layout
+
+\begin_layout Standard
+The session endpoint is for manipulating the charger session at a specific
+ charger.
+ The GET request retrieves the JSON representation of the session including
+ start time and associated user.
+ While the PUT request is supported, there are no changes that can be made
+ to a session via it's endpoint.
+ The POST method, instead of starting sessions, queues the user at that
+ location instead.
+ This is in order to stop users jumping the queue by directly starting sessions
+ at the charger.
+\end_layout
+
+\begin_layout Standard
+The DELETE method is for ending sessions and is again particularly used
+ by the charging units in order to end sessions when the car is unplugged.
+\end_layout
+
 \begin_layout Subsection
 User Blueprint
 \end_layout
@@ -765,6 +894,52 @@ Authentication Blueprint
 \end_layout
 
 \begin_layout Section
+Security
+\end_layout
+
+\begin_layout Subsection
+Passwords
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Passwords"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Passwords should never be kept in the form they are provided by users at
+ rest as any breaches of the database will expose valuable user information.
+ Instead, passwords undergo processes called salting and hashing.
+ Hashing is a one way function that takes a variable length string and produces
+ a fixed length output, the same input string always provides the same output
+ string.
+ Importantly for password storage is the one way characteristic of the function
+ meaning the hashed password cannot be inversely 
+\begin_inset Quotes eld
+\end_inset
+
+un-hashed
+\begin_inset Quotes erd
+\end_inset
+
+ back into the clear text string.
+ Cracking hashed passwords must instead be done with large lookup tables
+ of passwords and the associated precomputed hashes, known as a rainbow
+ table attack.
+ In order to protect against brute force attacks of this fashion, salts
+ are used.
+ A salt is a random string of data that is appended to the user password
+ before hashing and then stored with it.
+ This reduces the effectiveness of a rainbow table attack as rainbow tables
+ cannot be practically pre-calculated for input passwords when a random
+ string has been added.
+ Passwords are salted using a 8 character long salt before being hashed
+ using the pbkdf2:sha256 algorithm.
+\end_layout
+
+\begin_layout Subsection
 Authentication
 \begin_inset CommandInset label
 LatexCommand label
@@ -797,7 +972,7 @@ Authorization
  The value of this header prescribes which method is being used.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 Basic Auth
 \end_layout
 
@@ -832,8 +1007,73 @@ When ensuring, as this service does, that all requests of the API are encrypted
  a more secure method was used for release.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 Bearer Token
+\end_layout
+
+\begin_layout Section
+Pricing
+\end_layout
+
+\begin_layout Standard
+An important aspect of using a third-party hosting platform for all the
+ required services is the prices for each service, both currently and when
+ anticipating future growth.
+ When looking back to figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:gcp-services"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ each of the listed services have free tiers and prices following these
+ quotas.
+ Using estimations of possible system loads and the Google Cloud Platform
+ pricing calculator
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gcp-pricing"
+literal "false"
+
+\end_inset
+
+ an estimation of running costs can be obtained.
+\end_layout
+
+\begin_layout Standard
+Firestore database allows 1GB of storage for free, a limit that with text
+ based records would not be easily reached.
+ It also allows 50,000 reads, 20,000 writes and 20,000 deletes a day.
+\end_layout
+
+\begin_layout Standard
+The serverless Cloud Functions allow 2 million invocations a month for free
+ with 400,000 GB-seconds memory, 200,000 GHz-seconds of compute time.
+ Being used as a utility function for updating user access tokens means
+ that these quotas would likely not be reached.
+\end_layout
+
+\begin_layout Standard
+The service that is most likely to be used beyond it's free quotas is that
+ of the App Engine.
+ The App Engine provides 28 instance hours a day, while the service would
+ not likely be used during the night busy times of day could see more simultaneo
+us traffic to the service and require more running instances.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "references"
+options "bibtotoc"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
