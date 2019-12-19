@@ -69,7 +69,9 @@ def parse_user(user_ref=None, user_snapshot=None) -> User:
                 score_last_updated=user_dict.get('score_last_updated'),
 
                 access_token=user_dict.get('access_token'),
-                access_token_last_refreshed=user_dict.get('access_token_last_refreshed'))
+                access_token_last_refreshed=user_dict.get('access_token_last_refreshed'),
+
+                notification_token=user_dict.get('notification_token'))
 
 
 def create_user(username: str,
@@ -95,7 +97,8 @@ def create_user(username: str,
         'state': User.State.inactive.name,
         'score_last_updated': datetime.utcnow(),
         'access_token': get_new_access_token(),
-        'access_token_last_refreshed': datetime.utcnow()
+        'access_token_last_refreshed': datetime.utcnow(),
+        'notification_token': None
     }
 
     user_collection.document().set(user_info)

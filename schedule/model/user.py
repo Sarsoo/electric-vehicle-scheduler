@@ -5,6 +5,13 @@ from datetime import datetime
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import logging
+import firebase_admin
+import firebase_admin.messaging as messaging
+
+logger = logging.getLogger(__name__)
+fire_admin = firebase_admin.initialize_app()
+
 restingScore = 500.0
 ddtInactive = 0.00694444444  # +/-25 per hour, tends towards restingScore (500)
 ddtIn_Queue = -ddtInactive
@@ -38,7 +45,9 @@ class User:
                  score_last_updated: datetime,
 
                  access_token: str,
-                 access_token_last_refreshed: datetime):
+                 access_token_last_refreshed: datetime,
+
+                 notification_token: str):
         self.username = username
         self.db_ref = db_ref
 
@@ -51,6 +60,8 @@ class User:
 
         self._access_token = access_token
         self._access_token_last_refreshed = access_token_last_refreshed
+
+        self._notification_token = notification_token
 
     def to_dict(self) -> dict:
         return {
@@ -67,6 +78,25 @@ class User:
 
     def refresh_access_token(self):
         self.access_token = db.get_new_access_token()
+
+    def send_notification(self, title: str, body: str):
+
+        if self.notification_token is None:
+            return
+
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body,
+            ),
+            android=messaging.AndroidConfig(
+                priority='high'
+            ),
+            token=self.notification_token
+        )
+
+        response = messaging.send(message)
+        logger.info(f'{response}')
 
     @property
     def password(self):
@@ -105,6 +135,43 @@ class User:
 
     @state.setter
     def state(self, value: State):
+        if self.state == value:
+            return
+
+        if self.state == self.State.inactive:
+            if self.state == self.State.in_queue:
+                pass
+            elif self.state == self.State.assigned:
+                self.send_notification('Scheduler', "You've been assigned a session!")
+            elif self.state in [self.State.connected_charging, self.State.connected_full]:
+                logger.warning(f'weird state change, {self.state.name} to {value.name}')
+        elif self.state == self.State.in_queue:
+            if self.state == self.State.inactive:
+                pass
+            elif self.state in [self.State.assigned, self.State.connected_full]:
+                logger.warning(f'weird state change, {self.state.name} to {value.name}')
+            elif self.state == self.State.connected_charging:
+                pass
+        elif self.state == self.State.assigned:
+            if self.state == self.State.inactive:
+                pass
+            elif self.state in [self.State.in_queue, self.State.connected_full]:
+                logger.warning(f'weird state change, {self.state.name} to {value.name}')
+            elif self.state == self.State.connected_charging:
+                pass
+        elif self.state == self.State.connected_charging:
+            if self.state == self.State.inactive:
+                pass
+            elif self.state in [self.State.in_queue, self.State.assigned]:
+                logger.warning(f'weird state change, {self.state.name} to {value.name}')
+            elif self.state == self.State.connected_full:
+                self.send_notification('Scheduler', "You're car has finished charging")
+        elif self.state == self.State.connected_full:
+            if self.state == self.State.inactive:
+                pass
+            elif self.state in [self.State.in_queue, self.State.assigned, self.State.connected_charging]:
+                logger.warning(f'weird state change, {self.state.name} to {value.name}')
+
         db.update_user(self.username, {'state': value.name})
         self._state = value
 
@@ -125,6 +192,15 @@ class User:
     def access_token(self, value: float):
         db.update_user(self.username, {'access_token': value})
         self._access_token = value
+
+    @property
+    def notification_token(self):
+        return self._notification_token
+
+    @notification_token.setter
+    def notification_token(self, value: float):
+        db.update_user(self.username, {'notification_token': value})
+        self._notification_token = value
 
     @property
     def access_token_last_refreshed(self):

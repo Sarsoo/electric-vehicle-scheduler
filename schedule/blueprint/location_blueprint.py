@@ -8,12 +8,10 @@ from schedule.model.user import User
 import logging
 
 from google.cloud import firestore
-import firebase_admin
 
 blueprint = Blueprint('bp_location', __name__)
 db = firestore.Client()
 
-fire_admin = firebase_admin.initialize_app()
 logger = logging.getLogger(__name__)
 
 

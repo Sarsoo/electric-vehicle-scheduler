@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 @blueprint.route('', methods=['GET', 'PUT'])
 @access_token
 @url_arg_username_override
-def user(current_user=None):
+def user(current_user: User = None):
     if request.method == 'GET':
         return get_user(current_user)
     elif request.method == 'PUT':
@@ -27,7 +27,7 @@ def user(current_user=None):
 @blueprint.route('', methods=['POST'])
 @access_token
 @admin_required
-def user_restricted(current_user=None):
+def user_restricted(current_user: User = None):
     if request.method == 'POST':
         return post_user(current_user)
 
@@ -79,6 +79,9 @@ def put_user(current_user):
                     'message': 'wrong password, no other updates made',
                     'status': 'error'
                 }), 400
+
+        if 'notification_token' in request_json:
+            current_user.notification_token = request_json['notification_token']
 
         return jsonify({
             'message': f'user {current_user.username} updated',
