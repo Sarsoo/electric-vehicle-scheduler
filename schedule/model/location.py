@@ -44,9 +44,12 @@ class Charger:
             'location_id': self.location_id,
             'charger_id': self.charger_id,
             'active_session': self.active_session,
-            'session': self.active_session_obj.to_dict() if self.active_session_obj is not None else None,
+            # 'session': self.active_session_obj.to_dict() if self.active_session_obj is not None else None,
             'state': self.state.name
         }
+
+    def __str__(self):
+        return f'{self.location_id}:{self.charger_id}'
 
     @property
     def active_session(self) -> int:
@@ -125,6 +128,9 @@ class Location:
         self.chargers = chargers
 
         self._queue = queue
+
+    def __str__(self):
+        return self.location_id
 
     def add_charger(self, charger_id: str):
         database.create_charger(self.location_id, charger_id)

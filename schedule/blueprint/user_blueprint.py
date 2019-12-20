@@ -5,7 +5,7 @@ import logging
 from google.cloud import firestore
 
 import schedule.db.database as database
-from schedule.blueprint.decorators import basic_auth, admin_required, url_arg_username_override, access_token
+from schedule.blueprint.decorators import admin_required, url_arg_username_override, access_token
 from schedule.model.user import User
 
 blueprint = Blueprint('bp_user', __name__)

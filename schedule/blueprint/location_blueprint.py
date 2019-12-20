@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 
-from schedule.blueprint.decorators import admin_required, access_token, access_token
+from schedule.blueprint.decorators import admin_required, access_token
 import schedule.db.database as database
 from schedule.model.location import Charger
 from schedule.model.user import User
@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 @blueprint.route('', methods=['GET'])
 @access_token
-@admin_required
 def locations(current_user: User = None):
     pulled = database.get_locations()
 
@@ -200,51 +199,32 @@ def put_charger(location_id, charger_id, current_user):
         request_json = request.get_json()
 
         if charger_obj.active_session is not None:
-            if current_user.user_type == User.Type.service:
-                if 'state' in request_json:
-                    try:
-                        new_state = Charger.State[request_json['state'].lower()]
-                        if charger_obj.state == Charger.State.available and new_state == Charger.State.pre_session:
-                            logger.error(f'sessions must be started from the queue ({current_user}) '
-                                         f'{location_id}:{charger_id}:{charger_obj.active_session}')
-                            return jsonify({
-                                'message': f'sessions must be started from the queue '
-                                           f'{location_id}:{charger_id}:{charger_obj.active_session}',
-                                'status': 'error'
-                            }), 400
-                        elif charger_obj.state == Charger.State.full and new_state == Charger.State.available:
-                            logger.error(f'sessions must be ended from the queue ({current_user}) '
-                                         f'{location_id}:{charger_id}:{charger_obj.active_session}')
-                            return jsonify({
-                                'message': f'sessions must be ended from the queue '
-                                           f'{location_id}:{charger_id}:{charger_obj.active_session}',
-                                'status': 'error'
-                            }), 400
+            if 'state' in request_json:
+                try:
+                    new_state = Charger.State[request_json['state'].lower()]
+                    if charger_obj.state == Charger.State.available and new_state == Charger.State.pre_session:
+                        return post_session(location_id, charger_id, current_user)
+                    elif charger_obj.state == Charger.State.full and new_state == Charger.State.available:
+                        return delete_session(location_id, charger_id, current_user)
+                    else:
                         charger_obj.state = new_state
 
-                    except KeyError:
-                        logger.error(f'{request_json["state"]} is not a valid charger state ({current_user}) '
-                                     f'{location_id}:{charger_id}:{charger_obj.active_session}')
-                        return jsonify({
-                            'message': f'{request_json["state"]} is not a valid charger state '
-                                       f'{location_id}:{charger_id}:{charger_obj.active_session}',
-                            'status': 'error'
-                        }), 400
-                    except SystemError:
-                        logger.error(f'{Charger.state} to {request_json["state"]} is not a valid state change '
-                                     f'({current_user}) {location_id}:{charger_id}:{charger_obj.active_session}')
-                        return jsonify({
-                            'message': f'{request_json["state"]} is not a valid charger state '
-                                       f'{location_id}:{charger_id}:{charger_obj.active_session}',
-                            'status': 'error'
-                        }), 400
-            else:
-                logger.error(f'{current_user} is not a service account '
-                             f'{location_id}:{charger_id}:{charger_obj.active_session}')
-                return jsonify({
-                    'message': f'{current_user} is not a service account',
-                    'status': 'error'
-                }), 400
+                except KeyError:
+                    logger.error(f'{request_json["state"]} is not a valid charger state ({current_user}) '
+                                 f'{location_id}:{charger_id}:{charger_obj.active_session}')
+                    return jsonify({
+                        'message': f'{request_json["state"]} is not a valid charger state '
+                                   f'{location_id}:{charger_id}:{charger_obj.active_session}',
+                        'status': 'error'
+                    }), 400
+                except SystemError:
+                    logger.error(f'{Charger.state} to {request_json["state"]} is not a valid state change '
+                                 f'({current_user}) {location_id}:{charger_id}:{charger_obj.active_session}')
+                    return jsonify({
+                        'message': f'{request_json["state"]} is not a valid charger state '
+                                   f'{location_id}:{charger_id}:{charger_obj.active_session}',
+                        'status': 'error'
+                    }), 400
         else:
             logger.error(f'no session running at {location_id}:{charger_id}')
             return jsonify({
@@ -265,8 +245,6 @@ def put_charger(location_id, charger_id, current_user):
 
 
 def post_charger(location_id, charger_id, current_user):
-    request_json = request.get_json()
-
     logger.info(f'creating {location_id}:{charger_id} charger for {current_user}')
 
     try:

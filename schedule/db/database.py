@@ -105,7 +105,7 @@ def create_user(username: str,
 
 
 def update_user(username: str, updates: dict):
-    logger.debug(f'updating {username}')
+    logger.debug(f'updating {username}, {", ".join([f"{i} = {j}" for i, j in updates.items()])}')
 
     user = get_user(username)
 
@@ -192,7 +192,7 @@ def create_location(location_id: str) -> None:
 
 
 def update_location(location_id: str, updates: dict):
-    logger.debug(f'updating {location_id}')
+    logger.debug(f'updating {location_id}, {", ".join([f"{i} = {j}" for i, j in updates.items()])}')
 
     location = get_location(location_id)
 
@@ -340,7 +340,7 @@ def create_charger(location_id: str, charger_id: str) -> None:
 
 
 def update_charger(location_id: str, charger_id: str, updates: dict):
-    logger.debug(f'updating {location_id}:{charger_id}')
+    logger.debug(f'updating {location_id}:{charger_id}, {", ".join([f"{i} = {j}" for i, j in updates.items()])}')
 
     charger = get_charger(location_id, charger_id)
 
@@ -496,7 +496,7 @@ def parse_session(session_ref=None, session_snapshot=None) -> Session:
 
 
 def update_session(location_id: str, charger_id: str, updates: dict):
-    logger.debug(f'updating {location_id}:{charger_id} session')
+    logger.debug(f'updating {location_id}:{charger_id} session, {", ".join([f"{i} = {j}" for i, j in updates.items()])}')
 
     session = get_active_session(location_id, charger_id)
 

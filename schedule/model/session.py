@@ -36,6 +36,9 @@ class Session:
             'user': self.user.to_dict()
         }
 
+    def __str__(self):
+        return f'{self.location_id}:{self.charger_id}:{self.session_id}'
+
     @property
     def start_time(self):
         return self._start_time
