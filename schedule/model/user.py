@@ -139,37 +139,37 @@ class User:
             return
 
         if self.state == self.State.inactive:
-            if self.state == self.State.in_queue:
+            if value == self.State.in_queue:
                 pass
-            elif self.state == self.State.assigned:
+            elif value == self.State.assigned:
                 self.send_notification('Scheduler', "You've been assigned a session!")
-            elif self.state in [self.State.connected_charging, self.State.connected_full]:
+            elif value in [self.State.connected_charging, self.State.connected_full]:
                 logger.warning(f'weird state change, {self.state.name} to {value.name}')
         elif self.state == self.State.in_queue:
-            if self.state == self.State.inactive:
+            if value == self.State.inactive:
                 pass
-            elif self.state in [self.State.assigned, self.State.connected_full]:
+            elif value in [self.State.assigned, self.State.connected_full]:
                 logger.warning(f'weird state change, {self.state.name} to {value.name}')
-            elif self.state == self.State.connected_charging:
+            elif value == self.State.connected_charging:
                 pass
         elif self.state == self.State.assigned:
-            if self.state == self.State.inactive:
+            if value == self.State.inactive:
                 pass
-            elif self.state in [self.State.in_queue, self.State.connected_full]:
+            elif value in [self.State.in_queue, self.State.connected_full]:
                 logger.warning(f'weird state change, {self.state.name} to {value.name}')
-            elif self.state == self.State.connected_charging:
+            elif value == self.State.connected_charging:
                 pass
         elif self.state == self.State.connected_charging:
-            if self.state == self.State.inactive:
+            if value == self.State.inactive:
                 pass
-            elif self.state in [self.State.in_queue, self.State.assigned]:
+            elif value in [self.State.in_queue, self.State.assigned]:
                 logger.warning(f'weird state change, {self.state.name} to {value.name}')
-            elif self.state == self.State.connected_full:
+            elif value == self.State.connected_full:
                 self.send_notification('Scheduler', "You're car has finished charging")
         elif self.state == self.State.connected_full:
-            if self.state == self.State.inactive:
+            if value == self.State.inactive:
                 pass
-            elif self.state in [self.State.in_queue, self.State.assigned, self.State.connected_charging]:
+            elif value in [self.State.in_queue, self.State.assigned, self.State.connected_charging]:
                 logger.warning(f'weird state change, {self.state.name} to {value.name}')
 
         db.update_user(self.username, {'state': value.name})
