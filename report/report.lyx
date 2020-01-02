@@ -86,10 +86,6 @@ todonotes
 
 \begin_body
 
-\begin_layout Title
-Cloud Back-End
-\end_layout
-
 \begin_layout List of TODOs
 
 \end_layout
@@ -101,17 +97,48 @@ LatexCommand tableofcontents
 \end_inset
 
 
-\begin_inset VSpace bigskip
+\begin_inset Newpage newpage
 \end_inset
 
 
 \end_layout
 
+\begin_layout Part
+Cloud Services
+\end_layout
+
 \begin_layout Standard
-In the front-end/back-end model the purpose of a back-end is to act as the
- data access layer (DAL) for a service.
+When designing a commercial product with services available over the internet,
+ the code to run those services cannot solely be run in individual phone
+ apps or on IOT-esque pieces of hardware.
+ The need for an authoritative store of information such as user details
+ and service specific information (location and charge station details)
+ requires a central instance of code to store information and make that
+ data available when properly authorised.
+\end_layout
+
+\begin_layout Standard
+The relationship between the code that the user interacts with directly
+ including the mobile app and the charging unit and that which centrally
+ controls the service is described as the separation between the front-end
+ and back-end of an application.
+\end_layout
+
+\begin_layout Standard
+More precisely in the front-end/back-end model the back-end acts as the
+ data access layer (DAL), while the front-end is the presentation layer
+ for a service.
  Comparing this with the client-server model the front-end is typically
  the client with the server acting as the back-end.
+\end_layout
+
+\begin_layout Standard
+To communicate with a server over the internet the Hypertext Transfer Protocol
+ (HTTP) is used.
+ Destination servers, as such, host HTTP servers to process and respond
+ to requests.
+ At a high level HTTP servers typically act as a layer of logic between
+ users and databases for data persistence.
 \end_layout
 
 \begin_layout Section
@@ -121,7 +148,7 @@ Language
 \begin_layout Standard
 There are many languages well suited to writing HTTP servers from well establish
 ed ecosystems like PHP, Java and Ruby to newer environments such as Python
- and Javascript with Node.
+ and Javascript using Node.js.
  An understanding of the language combined with high speed of prototyping
  led Python to be chosen.
  
@@ -156,14 +183,21 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-Django has a strong database abstraction layer and is opinionated in the
- structure of a web application.
+Django has a strong database abstraction layer and is 
+\begin_inset Quotes eld
+\end_inset
+
+somewhat-opinionated
+\begin_inset Quotes erd
+\end_inset
+
+ about the structure of web applications.
  Flask however has a more minimalist structure, functioning as a micro-framework
  that lightly wraps around both the Werkzeug library for a WSGI toolkit
  and Jinja for template engine support.
  It has no database layer or form validation, however it's un-opinionated
  structure and flexibility proves to be agile and very powerful.
- Flask was chosen to write the application.
+ For these reasons Flask was chosen for implementing the WSGI interface.
  
 \end_layout
 
@@ -200,7 +234,8 @@ HTTP API Hosting
 
 \begin_layout Standard
 The Flask HTTP server requires hosting in order to allow communications
- between the server and both the app and hardware over the public internet.
+ between the server and both the mobile app and hardware over the public
+ internet.
  This can be done in various ways, one of which being to create a virtual
  machine on which WSGI applications can be started using a WSGI server like
  Gunicorn.
@@ -230,10 +265,12 @@ serverless
  with the most popular being function-as-a-service or FaaS, the AWS and
  GCP products being Lambda functions and Cloud functions respectively.
  FaaS services allow users to write and deploy individual functions or methods
- of source code to be run by a trigger, functions are charged for per invocation.
- These triggers can be HTTP requests allowing single functions to be mounted
- on unique URLs, database state changes and asynchronous message queues.
- HTTP triggers allow users to write individual API endpoints as functions
+ of source code to be run by a trigger, functions are then charged per invocatio
+n.
+ These triggers can include database state changes, asynchronous message
+ queues or HTTP requests allowing single functions to be mounted on unique
+ URLs.
+ HTTP triggers allow users to write API endpoints as individual functions
  however for this project's requirements this would be too granular, FaaS
  services instead proved useful for utility functions for the service.
 \end_layout
@@ -241,21 +278,19 @@ serverless
 \begin_layout Standard
 Platform as a service or PaaS is a similar architecture retaining many of
  the advantages of serverless products.
- It finds a compromise between virtual machine management and FaaS options
- of before.
- When thinking about serverless as a concept as opposed to the implementations
- themselves, FaaS provides serverless hosting for individual methods of
- source code, PaaS can be seen as serverless hosting of entire WSGI applications
- when working in Python.
+ It finds a compromise between the more manual approaches such as virtual
+ machine management and the more abstracted FaaS options of before.
+ To compare to FaaS which provides serverless hosting for individual methods
+ of source code, PaaS can be seen as serverless hosting of entire WSGI applicati
+ons when working in Python.
  In this way advantages of serverless hosting such as reduced configuration
  and high scalability are retained while allowing developers to create APIs
- with WSGI applications as opposed to individual method or functions per
- endpoint.
+ in the more industry standard WSGI format.
 \end_layout
 
 \begin_layout Standard
-One of the main advantages of both serverless and PaaS architecture is it's
- ability to horizontally scale on demand.
+One of the main advantages of serverless (including PaaS) architecture is
+ it's ability to horizontally scale on demand.
  Horizontal scaling describes a services ability to handle concurrent traffic,
  typically scaling horizontally is achieved by running more instances of
  an application at a time.
@@ -319,7 +354,7 @@ GCP has many options for database services depending on the requirements.
 Equally, for NoSQL there are two main options.
  Cloud Bigtable offers global scale NoSQL database instances able to handle
  petabyte sized datasets designed for analytical big data workloads.
- The other option is Cloud Firestore, a new service from GCP under the Firebase
+ Alternatively Cloud Firestore, a new service from GCP under the Firebase
  brand banner.
  
 \end_layout
@@ -483,8 +518,8 @@ noprefix "false"
 The user type allowed the implementation of access controls between different
  use cases.
  End users are classed as 'user' and have limited access to much of the
- resource types while 'admin' accounts are able to write changes make all
- types of requests and this set of user types would be heavily restricted.
+ resource types while 'admin' accounts are able to make all types of requests,
+ naturally this set of users would be heavily restricted.
  Service accounts are used by the charging units in order to make changes
  on behalf of the system.
  This includes changing the state of the charging structure throughout the
@@ -495,7 +530,7 @@ The user type allowed the implementation of access controls between different
 \begin_layout Standard
 The state of the user is defined by the life cycle of a charging session
  as described in the associated enumerated type.
- Using Python properties specific state changes for a user have associated
+ Using Python properties, specific state changes for a user have associated
  actions, this is where mobile notifications are triggered in order to inform
  the user of changes in the charging state.
 \end_layout
@@ -548,9 +583,9 @@ Charging Structure
 \begin_layout Standard
 The layout for charging architecture defines two object modelling physical
  structure and a session object.
- A Location defines a physical location at which are charging stations.
+ A Location defines a physical location at which are found charging stations.
  An office building with electric vehicle parking spaces is a Location as
- would be a multi-story car park.
+ would be a multi-storey car park.
  Functionally it is any group of charging spots.
 \end_layout
 
@@ -566,7 +601,7 @@ A Session defines a discrete charging window completed by a user.
  such.
  The user begins charging their car and upon completion is notified that
  they can remove their car.
- When a user unplugs the car the session ends and ticks the locations queue
+ When a user unplugs the car the session ends and ticks the location's queue
  to select the next user.
 \end_layout
 
@@ -644,11 +679,11 @@ literal "false"
 
 \begin_layout Standard
 Routes are registered using a function decorator provided by the application
- defining that method as a URL route.
+ defining that method with a URL string pattern to match requests.
  The return value of the method is passed back to the HTTP requester as
  the response.
- This decorator takes both the intended route string and the available HTTP
- methods as parameters.
+ This decorator takes both the intended route string pattern and the available
+ HTTP methods as parameters.
 \end_layout
 
 \begin_layout Subsection
@@ -661,7 +696,7 @@ In designing the web server an approach taking in to account REST architecture.
  web services.
  Each URL is treated as an identifier for a resource it describes.
  Making requests with different HTTP methods at this URL represents different
- action to be taken on the object that URL identifies.
+ actions to be taken on the object that URL identifies.
  The most common methods are GET, POST, PUT and DELETE.
 \end_layout
 
@@ -897,6 +932,37 @@ Authentication Blueprint
 Security
 \end_layout
 
+\begin_layout Standard
+When operating a cloud-based commercial service arguably the most important
+ aspect of it's design is that of security.
+ Security breaches increasingly occur in large public companies allowing
+ the distribution of customer's private information and the exploitation
+ of services
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+improve wording
+\end_layout
+
+\end_inset
+
+.
+ Fortunately, using a serverless architecture abstracts away much of the
+ required boilerplate security administration such as managing complex firewall
+ setups and intrusion detection and prevention systems (IDS/IPS).
+\end_layout
+
+\begin_layout Standard
+The three main areas of this service requiring considerations from a security
+ perspective are those of access controls, password handling and authentication.
+ Access controls have been discussed above in the layout of the HTTP API
+ and involves considering which users should be able to complete what actions
+ and what the implications of such access are.
+ For example ensuring that only system owned accounts, admin accounts and
+ the user who owns a session can manipulate it.
+\end_layout
+
 \begin_layout Subsection
 Passwords
 \begin_inset CommandInset label
@@ -909,14 +975,21 @@ name "subsec:Passwords"
 \end_layout
 
 \begin_layout Standard
-Passwords should never be kept in the form they are provided by users at
- rest as any breaches of the database will expose valuable user information.
- Instead, passwords undergo processes called salting and hashing.
- Hashing is a one way function that takes a variable length string and produces
- a fixed length output, the same input string always provides the same output
- string.
- Importantly for password storage is the one way characteristic of the function
- meaning the hashed password cannot be inversely 
+Passwords should never be stored in the cleartext form they are provided
+ by users as any breaches of the database will expose sensitive user information.
+ The impact of such a breach would not only cover this service but could
+ prove devastating for users who use the same password across websites (however
+ unadvisable that is), this proves to be valuable attack vector for bad
+ actors.
+\end_layout
+
+\begin_layout Standard
+To secure passwords they should undergo processes such as salting and hashing.
+ Hashing is a mathematical one way function that takes a variable length
+ string and produces a reproducible fixed length output, the same input
+ string always provides the same output string.
+ Importantly for password storage is the one way characteristic of the function,
+ this means the hashed password cannot be inversely 
 \begin_inset Quotes eld
 \end_inset
 
@@ -925,18 +998,18 @@ un-hashed
 \end_inset
 
  back into the clear text string.
- Cracking hashed passwords must instead be done with large lookup tables
- of passwords and the associated precomputed hashes, known as a rainbow
+ Cracking hashed passwords must instead be done with large tables of cleartext
+ passwords and the associated precomputed hashes, this is known as a rainbow
  table attack.
  In order to protect against brute force attacks of this fashion, salts
- are used.
+ are additionally used.
  A salt is a random string of data that is appended to the user password
  before hashing and then stored with it.
  This reduces the effectiveness of a rainbow table attack as rainbow tables
- cannot be practically pre-calculated for input passwords when a random
- string has been added.
- Passwords are salted using a 8 character long salt before being hashed
- using the pbkdf2:sha256 algorithm.
+ cannot practically be pre-calculated for input passwords when mangled by
+ a random string in this way.
+ For this implementation passwords are salted using a 8 character long salt
+ before being hashed using the pbkdf2:sha256 algorithm.
 \end_layout
 
 \begin_layout Subsection
@@ -1011,6 +1084,73 @@ When ensuring, as this service does, that all requests of the API are encrypted
 Bearer Token
 \end_layout
 
+\begin_layout Standard
+A bearer token delegates the authentication authority from the user credentials
+ themselves to a separate piece of secret information.
+ In doing so, the need to repeatably share user passwords or derivatives
+ of is removed.
+ This additional piece of information is a string of characters typically
+ referred to as a key or token, it is provided with each request in the
+ authorization header in the form
+\end_layout
+
+\begin_layout Quote
+Bearer <token> 
+\end_layout
+
+\begin_layout Standard
+Bearer tokens in one form or another are the most common form of authorization
+ and authentication for web based APIs with standards such as OAuth (2.0)
+ and JSON web tokens (JWT) being well regarded technologies in this space.
+ OAuth describes an architecture for API authorization however while being
+ a proven structure, the system is fairly complex and has an emphasis on
+ allowing third party services delegated access to user information, something
+ that wouldn't be required for a service that expects only first party access.
+ OAuth is also first and foremost an authorization protocol with use for
+ authentication requiring extra steps that take it out of scope for this
+ application.
+\end_layout
+
+\begin_layout Standard
+This service uses a simpler implementation of bearer tokens with each user
+ having a unique and randomly generated key stored with their user information.
+ Tokens for accounts representing physical people are refreshed on a weekly
+ basis, in doing so any compromised key has it's value reduced as a result
+ of it's limited life time.
+ Keys are not rotated for service accounts as a result of their expectation
+ of running without user interaction.
+ While users can log back into the app when their token expires, having
+ charger unit keys expire in this way would require a workflow to supply
+ a new key
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+fix structure
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+A more advanced system for refreshing charging unit keys could be based
+ on a chain of public key certificates similar to the way that web servers
+ and websites use to prove their identity when using TLS.
+ The service could keep control of a root certificate that is used to sign
+ further certificates.
+ Each charger unit would be entrusted with it's own derivative certificate
+ used to sign requests for new tokens.
+ This would allow service account tokens to be refreshed as they now have
+ a trusted mechanism to retrieve new tokens.
+ Charger certificates deemed to be compromised could be revoked requiring
+ a unit's certificate to be reset and regenerated.
+ This could be done using a physical key such as a USB stick containing
+ it's own derivative certificate.
+\end_layout
+
 \begin_layout Section
 Pricing
 \end_layout
@@ -1062,6 +1202,10 @@ The service that is most likely to be used beyond it's free quotas is that
  The App Engine provides 28 instance hours a day, while the service would
  not likely be used during the night busy times of day could see more simultaneo
 us traffic to the service and require more running instances.
+\end_layout
+
+\begin_layout Part
+Discussion and Conclusions
 \end_layout
 
 \begin_layout Standard

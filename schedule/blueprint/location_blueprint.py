@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 
-from schedule.blueprint.decorators import admin_required, access_token
+from schedule.blueprint.decorators import admin_required, access_token, url_arg_username_override
 import schedule.db.database as database
 from schedule.model.location import Charger
 from schedule.model.user import User
@@ -299,6 +299,7 @@ def session(location_id, charger_id, current_user: User = None):
 @blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['PUT', 'POST', 'DELETE'])
 @access_token
 @admin_required
+@url_arg_username_override
 def session_restricted(location_id, charger_id, current_user: User = None):
     if request.method == 'PUT':
         return put_session(location_id, charger_id, current_user)
@@ -411,6 +412,7 @@ def delete_session(location_id, charger_id, current_user):
 
 @blueprint.route('/<location_id>/queue', methods=['POST', 'DELETE'])
 @access_token
+@url_arg_username_override
 def queue(location_id, current_user: User = None):
     if request.method == 'POST':
         return post_queue(location_id, current_user)

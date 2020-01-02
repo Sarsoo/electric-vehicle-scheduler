@@ -50,7 +50,7 @@ def get_token_user():
     header = request.headers.get('Authorization')
     if header is not None:
         if header.startswith('Bearer '):
-            token = header.strip('Bearer ')
+            token = header.lstrip('Bearer ')
             return next((i for i in database.get_users() if i.access_token == token), None)
 
     return None
