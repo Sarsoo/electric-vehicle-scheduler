@@ -108,9 +108,9 @@ Cloud Services
 \end_layout
 
 \begin_layout Standard
-When designing a commercial product with services available over the internet,
- the code to run those services cannot solely be run in individual phone
- apps or on IOT-esque pieces of hardware.
+When designing a centralised commercial product with services available
+ over the internet, the code to run those services cannot solely be run
+ in individual phone apps or on IOT-esque pieces of hardware.
  The need for an authoritative store of information such as user details
  and service specific information (location and charge station details)
  requires a central instance of code to store information and make that
@@ -128,17 +128,17 @@ The relationship between the code that the user interacts with directly
 More precisely in the front-end/back-end model the back-end acts as the
  data access layer (DAL), while the front-end is the presentation layer
  for a service.
- Comparing this with the client-server model the front-end is typically
- the client with the server acting as the back-end.
+ Comparing this with the client-server model the client is typically the
+ front-end with the server acting as the back-end.
 \end_layout
 
 \begin_layout Standard
 To communicate with a server over the internet the Hypertext Transfer Protocol
  (HTTP) is used.
- Destination servers, as such, host HTTP servers to process and respond
- to requests.
- At a high level HTTP servers typically act as a layer of logic between
- users and databases for data persistence.
+ As such, destination servers host HTTP servers to process and respond to
+ received requests.
+ At a high level HTTP APIs typically act as a layer of logic between users
+ and databases for data persistence.
 \end_layout
 
 \begin_layout Section
@@ -226,6 +226,18 @@ literal "false"
 With effective documentation and compelling free quotas combined with previous
  experience with the platform, GCP was used to provide all the hosting needs
  for the project without incurring any costs.
+ A final diagram of the cloud service architecture can be seen in figure
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:gcp-services"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -268,8 +280,8 @@ serverless
  of source code to be run by a trigger, functions are then charged per invocatio
 n.
  These triggers can include database state changes, asynchronous message
- queues or HTTP requests allowing single functions to be mounted on unique
- URLs.
+ queues or HTTP requests providing single functions with unique URLs to
+ trigger them.
  HTTP triggers allow users to write API endpoints as individual functions
  however for this project's requirements this would be too granular, FaaS
  services instead proved useful for utility functions for the service.
@@ -278,12 +290,12 @@ n.
 \begin_layout Standard
 Platform as a service or PaaS is a similar architecture retaining many of
  the advantages of serverless products.
- It finds a compromise between the more manual approaches such as virtual
- machine management and the more abstracted FaaS options of before.
+ It finds a compromise between the manual approaches of virtual machine
+ management and the more abstracted FaaS options of before.
  To compare to FaaS which provides serverless hosting for individual methods
  of source code, PaaS can be seen as serverless hosting of entire WSGI applicati
 ons when working in Python.
- In this way advantages of serverless hosting such as reduced configuration
+ In doing so the advantages of serverless hosting such as reduced configuration
  and high scalability are retained while allowing developers to create APIs
  in the more industry standard WSGI format.
 \end_layout
@@ -291,10 +303,10 @@ ons when working in Python.
 \begin_layout Standard
 One of the main advantages of serverless (including PaaS) architecture is
  it's ability to horizontally scale on demand.
- Horizontal scaling describes a services ability to handle concurrent traffic,
+ Horizontal scaling describes a service's ability to handle concurrent traffic,
  typically scaling horizontally is achieved by running more instances of
- an application at a time.
- This is as opposed to vertical scaling which instead describes a services
+ an application concurrently.
+ This is in contrast to vertical scaling which instead describes a services
  ability to handle more traffic with the same resources, typically by making
  each instance faster.
 \end_layout
@@ -304,15 +316,16 @@ Google App Engine
 \end_layout
 
 \begin_layout Standard
-Google App Engine (GAE) is a PaaS product on GCP providing application hosting
+Google App Engine (GAE) is a PaaS service by GCP providing application hosting
  for many different languages including Python.
  GAE provides many powerful features that either require complex configuration
- or are unfeasible with bare-metal solutions.
+ or are unfeasible with bare-metal or virtual machine based solutions.
 \end_layout
 
 \begin_layout Standard
-For example GAE provides automatic scaling allowing the number of application
- instances to dynamically increase in response to increased traffic.
+For example GAE provides automatic horizontal scaling allowing the number
+ of application instances to dynamically increase in response to increased
+ traffic.
  The scope of the GCP infrastructure gives effectively unlimited horizontal
  scale to smaller services that would otherwise be unable to handle such
  demand.
@@ -354,14 +367,13 @@ GCP has many options for database services depending on the requirements.
 Equally, for NoSQL there are two main options.
  Cloud Bigtable offers global scale NoSQL database instances able to handle
  petabyte sized datasets designed for analytical big data workloads.
- Alternatively Cloud Firestore, a new service from GCP under the Firebase
+ Alternatively, Cloud Firestore is a new service from GCP under the Firebase
  brand banner.
- 
 \end_layout
 
 \begin_layout Standard
-Firestore is also rated for global use and has a few key features that made
- it the ideal database for this project.
+Firestore is also rated for use at global scale and has a few key features
+ that made it the ideal database for this project.
  First, being marketed as the flagship NoSQL product, Firestore has key
  integrations with the rest of the GCP services, for example Cloud Functions
  can be triggered directly by changes within the database and Firebase provides
@@ -379,12 +391,77 @@ Firestore is also highly scalable and consistent as a result of it's serverless
 Mobile Notifications
 \end_layout
 
-\begin_layout Subsection
-Scheduling
+\begin_layout Standard
+Mobile notifications are a useful tool for providing instant messages and
+ updates to a user having superseded the previously accepted methods of
+ email and SMS messages.
+ 
+\end_layout
+
+\begin_layout Standard
+While mobile applications can locally generate notifications, a more useful
+ method of using notifications is for them to be generated and delivered
+ by a cloud based service and transmitted over the internet.
+ This allows changes in the service's state such as changes in a user's
+ car battery level to be relayed to the user.
+\end_layout
+
+\begin_layout Standard
+Due to the architecture of delivery and display when pushed over the internet,
+ notification systems are usually part of the mobile operating system such
+ as Firebase Cloud Messaging for Android and Apple Push Notification Service
+ for iOS.
+ Using Firebase Cloud Messaging messages can be sent to individual devices
+ or groups of devices, the former being identified using a device specific
+ key.
 \end_layout
 
 \begin_layout Subsection
 Cloud Pub/Sub
+\end_layout
+
+\begin_layout Standard
+Within a cloud system, the ability to orchestrate different aspects of the
+ architecture can be facilitated by sending messages between services.
+ This allows asynchronous updates and the spawning of tasks while maintaining
+ independence of different parts of the architecture.
+ A broad way to do this is by creating a communication channel within which
+ messages can be published and subscribed to.
+ Cloud Pub/Sub is a GCP service facilitating this form of communication.
+ While it has many applications it is particularly useful for long running
+ tasks triggered by HTTP requests or for background tasks within a service.
+\end_layout
+
+\begin_layout Standard
+In order to fully utilise a serverless architecture as described above,
+ FaaS Cloud Functions can be configured as subscribers to such messages,
+ increasing the speed with which messages can be processed.
+\end_layout
+
+\begin_layout Subsection
+Scheduling
+\end_layout
+
+\begin_layout Standard
+When operating a system of larger scale, typically there will be tasks required
+ to run repeatedly at predefined time intervals.
+ Cloud Scheduler is a service within the Google Cloud Platform taking inspiratio
+n from the Unix tool, Cron, allowing commands to be run in the background
+ at defined times.
+ 
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+changes in a users car charge level
+\end_layout
+
+\end_inset
+
+Cloud Scheduler uses the same string format defining time schedules and
+ has many different forms of triggers in including Google App Engine URL
+ endpoints and publishing messages to Pub/Sub message channels.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -515,10 +592,10 @@ noprefix "false"
 \end_layout
 
 \begin_layout Standard
-The user type allowed the implementation of access controls between different
- use cases.
- End users are classed as 'user' and have limited access to much of the
- resource types while 'admin' accounts are able to make all types of requests,
+Defining user types allowed the implementation of access controls between
+ different use cases.
+ End-users are classed as 'user' and have limited access to much of the
+ resource types while 'admin' accounts are able to make every types of request,
  naturally this set of users would be heavily restricted.
  Service accounts are used by the charging units in order to make changes
  on behalf of the system.
@@ -528,7 +605,7 @@ The user type allowed the implementation of access controls between different
 \end_layout
 
 \begin_layout Standard
-The state of the user is defined by the life cycle of a charging session
+The state of the user is defined by the life-cycle of a charging session
  as described in the associated enumerated type.
  Using Python properties, specific state changes for a user have associated
  actions, this is where mobile notifications are triggered in order to inform
@@ -553,7 +630,8 @@ noprefix "false"
 
 \begin_layout Standard
 The score and it's associated time of last update are used by the queue
- system in order to determine priorities when selecting users for sessions.
+ system in order to determine priorities when selecting the next users for
+ a session slot.
  The score is a function of time since it's last update and the users actions
  in that time using update_score(), the score algorithm is covered in section
  
@@ -561,17 +639,13 @@ The score and it's associated time of last update are used by the queue
 [SECTION WHERE JACK TALKS ABOUT ALGORITHM]
 \color inherit
 .
- The time parameter for this function is accepted as the time of the scores
- update when persisting this to the database.
- This is to account for the difference in time when processing many users
- in succession.
 \end_layout
 
 \begin_layout Standard
 Check_password() takes a clear-text password string as input and returns
  a boolean value determining whether it is the same as the stored password.
- This works by salting and hashing the password in the same fashion as the
- initial password was when supplied by the user.
+ This works by salting and hashing the query password in the same fashion
+ as the initial password was when supplied by the user.
  The hashes are compared for equality which also indicates that the two
  have the same clear-text values.
 \end_layout
@@ -584,8 +658,8 @@ Charging Structure
 The layout for charging architecture defines two object modelling physical
  structure and a session object.
  A Location defines a physical location at which are found charging stations.
- An office building with electric vehicle parking spaces is a Location as
- would be a multi-storey car park.
+ An office building with electric vehicle parking spaces would be a Location
+ as would be a multi-storey car park.
  Functionally it is any group of charging spots.
 \end_layout
 
@@ -616,7 +690,7 @@ e.
  the queue waiting to charge.
  The tick_queue() function updates the score for each user in the queue
  and selects the lowest scoring to receive the next session if available.
- The queue is tick both when a user is added to the queue and when a session
+ The queue is ticked both when a user is added to the queue and when a session
  ends to ensure the time is used effectively.
 \end_layout
 
@@ -639,10 +713,10 @@ Session
 \end_layout
 
 \begin_layout Standard
-Sessions are retained after their end for logging purposes, integer session
- IDs were selected in order to allow easier retrieval of new IDs, the maximum
- value of all available IDs is incremented.
- Similarly to the charger key session IDs are unique within their charger's
+Sessions are retained after their end for logging purposes, as such integer
+ session IDs were selected in order to allow easier retrieval of new IDs.
+ To do so the maximum value of all available IDs is incremented.
+ Similarly to the charger key, session IDs are unique within their charger's
  namespace, this allows a single session to be identified by a fully qualified
  ID, separated by colons for example,
 \end_layout
@@ -934,31 +1008,25 @@ Security
 
 \begin_layout Standard
 When operating a cloud-based commercial service arguably the most important
- aspect of it's design is that of security.
- Security breaches increasingly occur in large public companies allowing
- the distribution of customer's private information and the exploitation
- of services
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-improve wording
+ aspect of it's design is that of security, breaches increasingly occur
+ in large public companies allowing unauthorized access to customer's private
+ information.
+ 
 \end_layout
 
-\end_inset
-
-.
- Fortunately, using a serverless architecture abstracts away much of the
+\begin_layout Standard
+Fortunately, using a serverless architecture abstracts away much of the
  required boilerplate security administration such as managing complex firewall
- setups and intrusion detection and prevention systems (IDS/IPS).
+ setups and intrusion detection and prevention systems (IDS/IPS), instead
+ much of this low-level security is provided by the infrastructure itself.
 \end_layout
 
 \begin_layout Standard
 The three main areas of this service requiring considerations from a security
  perspective are those of access controls, password handling and authentication.
- Access controls have been discussed above in the layout of the HTTP API
- and involves considering which users should be able to complete what actions
- and what the implications of such access are.
+ Access controls have been discussed above in the data model and layout
+ of the HTTP API, it involves considering which users should be able to
+ conduct what actions and what the implications of such access are.
  For example ensuring that only system owned accounts, admin accounts and
  the user who owns a session can manipulate it.
 \end_layout
@@ -975,8 +1043,9 @@ name "subsec:Passwords"
 \end_layout
 
 \begin_layout Standard
-Passwords should never be stored in the cleartext form they are provided
- by users as any breaches of the database will expose sensitive user information.
+Passwords should never be stored at rest in the cleartext form they are
+ provided by users as any breaches of the database will expose sensitive
+ user information.
  The impact of such a breach would not only cover this service but could
  prove devastating for users who use the same password across websites (however
  unadvisable that is), this proves to be valuable attack vector for bad
@@ -984,10 +1053,11 @@ Passwords should never be stored in the cleartext form they are provided
 \end_layout
 
 \begin_layout Standard
-To secure passwords they should undergo processes such as salting and hashing.
- Hashing is a mathematical one way function that takes a variable length
- string and produces a reproducible fixed length output, the same input
- string always provides the same output string.
+To secure passwords they should undergo obfuscation processes such as salting
+ and hashing.
+ Hashing is a one-way function that takes a variable length string and produces
+ a reproducible fixed length output, the same input string always provides
+ the same output string.
  Importantly for password storage is the one way characteristic of the function,
  this means the hashed password cannot be inversely 
 \begin_inset Quotes eld
@@ -997,7 +1067,8 @@ un-hashed
 \begin_inset Quotes erd
 \end_inset
 
- back into the clear text string.
+ back into the clear text string, even with knowledge as to what type of
+ hashing was used.
  Cracking hashed passwords must instead be done with large tables of cleartext
  passwords and the associated precomputed hashes, this is known as a rainbow
  table attack.
@@ -1025,7 +1096,7 @@ name "sec:Authentication"
 
 \begin_layout Standard
 Authentication is a crucial concern when designing web services.
- Access controls and security measures are important facets of a system
+ Access controls and other security measures are important facets of a system
  however they are useless if weak authentication allows them to be circumvented.
  There are many ways to secure a HTTP API that range in security and complexity,
  finding a balance for the context of the service is important.
@@ -1041,7 +1112,7 @@ Authorization
 \begin_inset Quotes erd
 \end_inset
 
- header key of key-value pairs.
+ key of key-value pairs.
  The value of this header prescribes which method is being used.
 \end_layout
 
@@ -1057,7 +1128,9 @@ One of the most basic methods for authenticating with a HTTP is named as
 \end_layout
 
 \begin_layout Quote
-Basic base64_encode(<username>:<password>)
+Basic 
+\emph on
+base64_encode(<username>:<password>)
 \end_layout
 
 \begin_layout Standard
@@ -1069,11 +1142,10 @@ Base64 encoding is a binary-to-text encoding method and is not a form of
 
 \begin_layout Standard
 When ensuring, as this service does, that all requests of the API are encrypted
- using TLS, then these credentials are secure in transit, however this is
- not the only attack surface which should be protected.
+ using TLS, these credentials are secure in transit, however this is not
+ the only attack surface which should be protected.
  It also requires the requesting agent to have access to the user's cleartext
- password for inclusion every time which should be minimised as much as
- possible.
+ password for inclusion with each request.
  There is inherent risk if each HTTP request includes the unencrypted user
  password and ideally it should occur as little as possible.
  Basic authentication was used during the beta development but eventually
@@ -1087,7 +1159,7 @@ Bearer Token
 \begin_layout Standard
 A bearer token delegates the authentication authority from the user credentials
  themselves to a separate piece of secret information.
- In doing so, the need to repeatably share user passwords or derivatives
+ In doing so, the need to repeatably share user passwords or the derivatives
  of is removed.
  This additional piece of information is a string of characters typically
  referred to as a key or token, it is provided with each request in the
@@ -1095,11 +1167,15 @@ A bearer token delegates the authentication authority from the user credentials
 \end_layout
 
 \begin_layout Quote
-Bearer <token> 
+Bearer 
+\emph on
+<token>
+\emph default
+ 
 \end_layout
 
 \begin_layout Standard
-Bearer tokens in one form or another are the most common form of authorization
+Bearer tokens in one form or another are the most common form of authorisation
  and authentication for web based APIs with standards such as OAuth (2.0)
  and JSON web tokens (JWT) being well regarded technologies in this space.
  OAuth describes an architecture for API authorization however while being
@@ -1117,28 +1193,17 @@ This service uses a simpler implementation of bearer tokens with each user
  Tokens for accounts representing physical people are refreshed on a weekly
  basis, in doing so any compromised key has it's value reduced as a result
  of it's limited life time.
- Keys are not rotated for service accounts as a result of their expectation
- of running without user interaction.
+ Keys are not rotated for service accounts as the charging units are expected
+ to run without user interaction.
  While users can log back into the app when their token expires, having
  charger unit keys expire in this way would require a workflow to supply
- a new key
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-fix structure
-\end_layout
-
-\end_inset
-
-.
- 
+ new keys.
 \end_layout
 
 \begin_layout Standard
 A more advanced system for refreshing charging unit keys could be based
  on a chain of public key certificates similar to the way that web servers
- and websites use to prove their identity when using TLS.
+ and websites prove their identity when using TLS.
  The service could keep control of a root certificate that is used to sign
  further certificates.
  Each charger unit would be entrusted with it's own derivative certificate
@@ -1184,8 +1249,8 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-Firestore database allows 1GB of storage for free, a limit that with text
- based records would not be easily reached.
+Firestore database allows 1GB of storage for free, a limit that with the
+ scope of service required here would not be easily reached.
  It also allows 50,000 reads, 20,000 writes and 20,000 deletes a day.
 \end_layout
 
