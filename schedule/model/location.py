@@ -121,11 +121,13 @@ class Location:
                  db_ref: DocumentReference,
 
                  chargers: List[Charger],
+                 reset_queue_daily: bool,
                  queue: List[User]):
         self.location_id = location_id
         self.db_ref = db_ref
 
         self.chargers = chargers
+        self.reset_queue_daily = reset_queue_daily
 
         self._queue = queue
 
@@ -140,7 +142,8 @@ class Location:
         return {
             'location_id': self.location_id,
             'chargers': [i.to_dict() for i in self.chargers],
-            'queue': [i.to_dict() for i in self.queue]
+            'queue': [i.to_dict() for i in self.queue],
+            'reset_queue_daily': self.reset_queue_daily
         }
 
     @property

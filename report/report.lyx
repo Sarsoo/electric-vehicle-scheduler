@@ -258,7 +258,7 @@ on to create a secure public facing server, the growth of cloud computing
 \end_layout
 
 \begin_layout Subsubsection
-Serverless and PaaS
+Serverless Architecture
 \end_layout
 
 \begin_layout Standard
@@ -282,9 +282,12 @@ n.
  These triggers can include database state changes, asynchronous message
  queues or HTTP requests providing single functions with unique URLs to
  trigger them.
- HTTP triggers allow users to write API endpoints as individual functions
- however for this project's requirements this would be too granular, FaaS
- services instead proved useful for utility functions for the service.
+ HTTP triggers theoretically allow users to write entire APIs with endpoints
+ as individual functions.
+\end_layout
+
+\begin_layout Subsubsection
+PaaS
 \end_layout
 
 \begin_layout Standard
@@ -345,7 +348,7 @@ GAE also makes using TLS security extremely easy.
 App Engine includes TLS security with a Let's Encrypt certificate as standard
  and within the deployment configuration automatic redirects from HTTP to
  HTTPS can be added with one line.
- These two features make development and deployment fast and secure.
+ These two features can make development and deployment fast and secure.
 \end_layout
 
 \begin_layout Subsection
@@ -372,19 +375,15 @@ Equally, for NoSQL there are two main options.
 \end_layout
 
 \begin_layout Standard
-Firestore is also rated for use at global scale and has a few key features
- that made it the ideal database for this project.
- First, being marketed as the flagship NoSQL product, Firestore has key
- integrations with the rest of the GCP services, for example Cloud Functions
- can be triggered directly by changes within the database and Firebase provides
- authenticated access to the data from within mobile applications.
+Being marketed as the flagship NoSQL product, Firestore has key integrations
+ with the rest of the GCP services, for example Cloud Functions can be triggered
+ directly by changes within the database and Firebase provides authenticated
+ access to the data from within mobile applications.
 \end_layout
 
 \begin_layout Standard
 Firestore is also highly scalable and consistent as a result of it's serverless
  architecture.
- For these reasons Firestore was chosen to host the application data for
- this service.
 \end_layout
 
 \begin_layout Subsection
@@ -447,7 +446,7 @@ When operating a system of larger scale, typically there will be tasks required
  to run repeatedly at predefined time intervals.
  Cloud Scheduler is a service within the Google Cloud Platform taking inspiratio
 n from the Unix tool, Cron, allowing commands to be run in the background
- at defined times.
+ at flexibly defined times.
  
 \begin_inset Flex TODO Note (Margin)
 status open
@@ -464,6 +463,27 @@ Cloud Scheduler uses the same string format defining time schedules and
  
 \end_layout
 
+\begin_layout Subsection
+Final Infrastructure
+\end_layout
+
+\begin_layout Standard
+Looking to figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:gcp-services"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ Firestore was chosen as the data storage element of the final architecture.
+ Although a propriety library must be used to interface with the database
+ the library does have many benefits such as automatically authenticating
+ database actions when code is running on deployed GCP services.
+\end_layout
+
 \begin_layout Standard
 \begin_inset Float figure
 wide false
@@ -475,7 +495,7 @@ status open
 \begin_inset Graphics
 	filename cloud-structure.png
 	lyxscale 30
-	width 80col%
+	width 50col%
 
 \end_inset
 
@@ -504,6 +524,59 @@ name "fig:gcp-services"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Google App Engine was used to host the Flask application in the standard
+ environment which proves to be more than suitable for these requirements.
+ This GAE applications provides the public web host name to interface with
+ the mobile application and charging unit.
+ Cloud Scheduler is used to run utility tasks for the service at regular
+ intervals, during development two were defined.
+ Each task is encapsulated withing a serverless Cloud Function which is
+ triggered by subscribing to separate Cloud Pub/Sub queues.
+ Cloud Scheduler can then publish messages to these queues.
+\end_layout
+
+\begin_layout Standard
+The access token refresh task is part of the authentication workflow
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Authentication"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ The confidential keys used to authenticate with the API should be refreshed
+ periodically to reduce the value of any leaked keys, this function performs
+ that refresh action.
+\end_layout
+
+\begin_layout Standard
+The reset queue tasks performs actions related to the semantics of the service.
+ In the context of a workplace, the queue of users waiting for charging
+ sessions should not necessarily roll over to the next day.
+ Electric vehicle owners will typically charge their cars overnight leaving
+ charging at work as a top up for the return commute.
+ As a result, if a user is not able to receive a session that day, it does
+ not necessarily mean they would still want an available session the next
+ day.
+ To allow this, locations can be configured to have the queue of users reset
+ at midnight.
+\end_layout
+
+\begin_layout Standard
+Each of the compute services being used, namely the GAE application and
+ the serverless functions can be configured to use the centralised logging
+ provided by GCP allowing intuitive log review.
+\end_layout
+
+\begin_layout Standard
+Final the Firebase SDK is used in order to deliver mobile notifications
+ to users.
 \end_layout
 
 \begin_layout Section
@@ -537,7 +610,7 @@ status open
 \begin_inset Graphics
 	filename class diagram.png
 	lyxscale 30
-	width 80col%
+	width 50col%
 
 \end_inset
 
@@ -765,7 +838,7 @@ RESTful Services
 \end_layout
 
 \begin_layout Standard
-In designing the web server an approach taking in to account REST architecture.
+When designing a web server an approach taking in to account REST architecture.
  REST or Representational State Transfer is a structure and ethos for designing
  web services.
  Each URL is treated as an identifier for a resource it describes.
@@ -794,6 +867,21 @@ DELETE is for deleting the object the URL denotes.
 The aim of a RESTful web service is to make interacting with APIs consistent
  and intuitive both as a whole and when comparing different APIs.
  It is similar to a design pattern.
+\end_layout
+
+\begin_layout Standard
+A diagram laying out the structure of the API URL routes can be seen in
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:api-route-map"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -840,7 +928,7 @@ status open
 \begin_inset Graphics
 	filename api-map.png
 	lyxscale 30
-	width 70col%
+	width 50col%
 
 \end_inset
 
@@ -873,133 +961,6 @@ name "fig:api-route-map"
 \end_inset
 
 
-\end_layout
-
-\begin_layout Subsection
-Charging Structure Blueprint
-\end_layout
-
-\begin_layout Subsubsection
-Location
-\end_layout
-
-\begin_layout Standard
-Making a GET request at the /api/location endpoint responds with a list
- of all of the available locations registered in the service.
- Due to the security implications of having this information available,
- only admin accounts can make this request.
-\end_layout
-
-\begin_layout Standard
-Following the location with a location ID in the form /api/location/<location_id
-> allows requests to be made about individual locations.
- GET requests retrieve information about the location including the registered
- chargers and the current queue.
-\end_layout
-
-\begin_layout Standard
-PUT and POST requests manipulate and create locations respectively.
- Currently, however, there are no changes that can be made to a location
- using the PUT method.
- The DELETE method deletes a location, all of the PUT, POST and DELETE methods
- require admin rights.
-\end_layout
-
-\begin_layout Subsubsection
-Queue
-\end_layout
-
-\begin_layout Standard
-The queue endpoint for a location allows the addition and removal of users
- from a queue at a location.
- The POST method adds the currently logged in user, as inferred from the
- authentication credentials, to the queue at that location, The DELETE method
- removes the same user from the queue.
-\end_layout
-
-\begin_layout Subsubsection
-Charger
-\end_layout
-
-\begin_layout Standard
-The /api/location/<location_id>/charger allows GET requests in order to
- retrieve the list of registered chargers at that location.
- Similar to the location endpoint this can then be sub-indexed by charger
- ID in the following fashion
-\end_layout
-
-\begin_layout Quote
-/api/location/<location_id>/charger/<charger_id>
-\end_layout
-
-\begin_layout Standard
-and has the same implementations of HTTP methods.
- Unlike the location endpoint the charger allows updates to be made to it's
- state using the PUT method.
- This is a critical part of the session life cycle and is a change received
- by the charging units to indicate that charging has started or stopped.
- The new state is entered as part of the JSON body of the request.
- It is worth noting that charging sessions are not started or stopped by
- making the associated state changes but instead via the session endpoint.
- State changes in this fashion are instead for intra-session changes.
- Similar to the location endpoint, write functions must be made by admin
- accounts.
-\end_layout
-
-\begin_layout Subsubsection
-Session
-\end_layout
-
-\begin_layout Standard
-The session endpoint is for manipulating the charger session at a specific
- charger.
- The GET request retrieves the JSON representation of the session including
- start time and associated user.
- While the PUT request is supported, there are no changes that can be made
- to a session via it's endpoint.
- The POST method, instead of starting sessions, queues the user at that
- location instead.
- This is in order to stop users jumping the queue by directly starting sessions
- at the charger.
-\end_layout
-
-\begin_layout Standard
-The DELETE method is for ending sessions and is again particularly used
- by the charging units in order to end sessions when the car is unplugged.
-\end_layout
-
-\begin_layout Subsection
-User Blueprint
-\end_layout
-
-\begin_layout Standard
-The user blueprint only has one endpoint, /api/user.
- For each allowed HTTP method the actionable user is inferred from the authentic
-ation credentials.
- The mobile application makes system requests on behalf of the user which
- is typically where most of the user actions will originate from.
-\end_layout
-
-\begin_layout Standard
-Not all actions need to be made on the calling user however, admin accounts
- are able to override the target user by including a username in the URL
- arguments, for example 
-\end_layout
-
-\begin_layout Quote
-/api/user?username=andy
-\end_layout
-
-\begin_layout Standard
-The GET method for users returns the username, state and type of the requested
- user.
- The PUT allows updates to be made to the user password.
- POST and DELETE allow the creation and deletion of users however the requesting
- user must be an admin.
-\end_layout
-
-\begin_layout Subsection
-Authentication Blueprint
 \end_layout
 
 \begin_layout Section

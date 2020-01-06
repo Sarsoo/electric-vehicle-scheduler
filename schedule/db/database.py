@@ -163,7 +163,8 @@ def parse_location(location_ref=None, location_snapshot=None) -> Location:
     return Location(location_id=location_dict.get('location_id'),
                     db_ref=location_ref,
                     chargers=[parse_charger(charger_snapshot=i) for i in location_ref.collection('charger').stream()],
-                    queue=[parse_user(user_ref=i) for i in location_dict.get('queue')])
+                    queue=[parse_user(user_ref=i) for i in location_dict.get('queue')],
+                    reset_queue_daily=location_dict.get('reset_queue_daily', False))
 
 
 def create_location(location_id: str) -> None:
@@ -185,7 +186,8 @@ def create_location(location_id: str) -> None:
     # LOCATION DATABASE ENTITY MANIFEST
     location_info = {
         'location_id': location_id,
-        'queue': []
+        'queue': [],
+        'reset_queue_daily': False
     }
 
     location_collection.document().set(location_info)
