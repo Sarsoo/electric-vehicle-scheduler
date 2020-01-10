@@ -5,6 +5,10 @@
 \save_transient_properties true
 \origin unavailable
 \textclass paper
+\begin_preamble
+\usepackage{chngcntr}
+\counterwithin*{section}{part}
+\end_preamble
 \use_default_options true
 \begin_modules
 todonotes
@@ -86,10 +90,6 @@ todonotes
 
 \begin_body
 
-\begin_layout List of TODOs
-
-\end_layout
-
 \begin_layout Standard
 \begin_inset CommandInset toc
 LatexCommand tableofcontents
@@ -104,45 +104,39 @@ LatexCommand tableofcontents
 \end_layout
 
 \begin_layout Part
-Cloud Services
+Literature Review - Cloud Services
+\end_layout
+
+\begin_layout Section
+Hypertext Transfer Protocol (HTTP)
 \end_layout
 
 \begin_layout Standard
-When designing a centralised commercial product with services available
- over the internet, the code to run those services cannot solely be run
- in individual phone apps or on IOT-esque pieces of hardware.
- The need for an authoritative store of information such as user details
- and service specific information (location and charge station details)
- requires a central instance of code to store information and make that
- data available when properly authorised.
+The core of the backend services in the context of this project is an HTTP
+ (Hypertext Transfer Protocol) server.
+ When running, a server is available at a hostname (http://google.com) which
+ can be queried over the internet.
+ HTTP servers are ubiquitous on the internet and most internet communications
+ from retrieving websites to using web connected mobile apps and streaming
+ video takes place between a client and an HTTP server.
+ An HTTP server can be run locally on a PC but requires proper hosting in
+ order to allow communications over the public internet.
+ 
 \end_layout
 
 \begin_layout Standard
-The relationship between the code that the user interacts with directly
- including the mobile app and the charging unit and that which centrally
- controls the service is described as the separation between the front-end
- and back-end of an application.
+Apart from their direct use by the user in websites and video streaming,
+ HTTP can also be used to form APIs (Application Programming Interface)
+ where text is instead sent back and forth to represent actions in a service.
 \end_layout
 
 \begin_layout Standard
-More precisely in the front-end/back-end model the back-end acts as the
- data access layer (DAL), while the front-end is the presentation layer
- for a service.
- Comparing this with the client-server model the client is typically the
- front-end with the server acting as the back-end.
-\end_layout
-
-\begin_layout Standard
-To communicate with a server over the internet the Hypertext Transfer Protocol
- (HTTP) is used.
- As such, destination servers host HTTP servers to process and respond to
- received requests.
- At a high level HTTP APIs typically act as a layer of logic between users
+At a high level HTTP APIs typically act as a layer of logic between users
  and databases for data persistence.
 \end_layout
 
 \begin_layout Section
-Language
+Development Language
 \end_layout
 
 \begin_layout Standard
@@ -202,7 +196,7 @@ somewhat-opinionated
 \end_layout
 
 \begin_layout Section
-Infrastructure
+Cloud Computing Services
 \end_layout
 
 \begin_layout Standard
@@ -215,7 +209,7 @@ literal "false"
 \end_inset
 
  (GCP) is a platform of cloud computing products from Google offering services
- including compute, storage, databases, networking, AI and IOT.
+ from compute, storage and databases to networking, AI and IOT.
  Built upon the same infrastructure that hosts the public facing Google
  services, GCP is one of the largest and most feature rich platforms of
  it's type operating in the same space as Amazon Web Services and Microsoft's
@@ -225,34 +219,21 @@ literal "false"
 \begin_layout Standard
 With effective documentation and compelling free quotas combined with previous
  experience with the platform, GCP was used to provide all the hosting needs
- for the project without incurring any costs.
- A final diagram of the cloud service architecture can be seen in figure
+ for the project.
  
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:gcp-services"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Subsection
-HTTP API Hosting
+Compute Services
 \end_layout
 
 \begin_layout Standard
-The Flask HTTP server requires hosting in order to allow communications
- between the server and both the mobile app and hardware over the public
- internet.
- This can be done in various ways, one of which being to create a virtual
- machine on which WSGI applications can be started using a WSGI server like
- Gunicorn.
- While this presents the most manual set-up requiring careful Linux administrati
-on to create a secure public facing server, the growth of cloud computing
+Deploying an HTTP server to the public internet can be done in various ways.
+ One of the more established but manual approaches is to create a Linux
+ virtual machine on which WSGI applications can be started using a WSGI
+ server like Gunicorn.
+ This presents one of the most manual methods requiring careful Linux administra
+tion to create a secure public facing server, the growth of cloud computing
  platforms has removed the requirement for such overhead.
  
 \end_layout
@@ -273,13 +254,16 @@ serverless
 \end_inset
 
 .
- There are many different services using implementations the architecture
- with the most popular being function-as-a-service or FaaS, the AWS and
- GCP products being Lambda functions and Cloud functions respectively.
+ There are many different types of service using the architecture with the
+ most popular being function-as-a-service or FaaS, the AWS and GCP products
+ being Lambda functions and Cloud functions respectively.
  FaaS services allow users to write and deploy individual functions or methods
- of source code to be run by a trigger, functions are then charged per invocatio
-n.
- These triggers can include database state changes, asynchronous message
+ of source code to be run by a trigger.
+ 
+\end_layout
+
+\begin_layout Standard
+These triggers can include database state changes, asynchronous message
  queues or HTTP requests providing single functions with unique URLs to
  trigger them.
  HTTP triggers theoretically allow users to write entire APIs with endpoints
@@ -293,14 +277,14 @@ PaaS
 \begin_layout Standard
 Platform as a service or PaaS is a similar architecture retaining many of
  the advantages of serverless products.
- It finds a compromise between the manual approaches of virtual machine
- management and the more abstracted FaaS options of before.
+ It is a step towards the more manual approaches and implements the serverless
+ ethos in a different way.
  To compare to FaaS which provides serverless hosting for individual methods
  of source code, PaaS can be seen as serverless hosting of entire WSGI applicati
 ons when working in Python.
  In doing so the advantages of serverless hosting such as reduced configuration
  and high scalability are retained while allowing developers to create APIs
- in the more industry standard WSGI format.
+ in the industry standard WSGI format.
 \end_layout
 
 \begin_layout Standard
@@ -401,8 +385,9 @@ Mobile notifications are a useful tool for providing instant messages and
 While mobile applications can locally generate notifications, a more useful
  method of using notifications is for them to be generated and delivered
  by a cloud based service and transmitted over the internet.
- This allows changes in the service's state such as changes in a user's
+ This allows changes in the service’s state such as changes in a user’s
  car battery level to be relayed to the user.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -423,12 +408,14 @@ Cloud Pub/Sub
 Within a cloud system, the ability to orchestrate different aspects of the
  architecture can be facilitated by sending messages between services.
  This allows asynchronous updates and the spawning of tasks while maintaining
- independence of different parts of the architecture.
- A broad way to do this is by creating a communication channel within which
- messages can be published and subscribed to.
+ inde- pendence of different parts of the architecture.
+ A widely useful way to do this is by creating a communication channel within
+ which messages can be published and subscribed to.
  Cloud Pub/Sub is a GCP service facilitating this form of communication.
- While it has many applications it is particularly useful for long running
- tasks triggered by HTTP requests or for background tasks within a service.
+ While it has many applications it is particularly useful for starting long
+ running tasks triggered by HTTP requests or for background tasks within
+ a service.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -447,28 +434,50 @@ When operating a system of larger scale, typically there will be tasks required
  Cloud Scheduler is a service within the Google Cloud Platform taking inspiratio
 n from the Unix tool, Cron, allowing commands to be run in the background
  at flexibly defined times.
- 
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-changes in a users car charge level
-\end_layout
-
+ Cloud Scheduler uses the same string format defining time schedules and
+ has many different actions including Google App Engine URL endpoints and
+ publishing messages to Pub/Sub message channels.
+\begin_inset Newpage newpage
 \end_inset
 
-Cloud Scheduler uses the same string format defining time schedules and
- has many different forms of triggers in including Google App Engine URL
- endpoints and publishing messages to Pub/Sub message channels.
- 
+
 \end_layout
 
-\begin_layout Subsection
-Final Infrastructure
+\begin_layout Part
+Cloud Services
 \end_layout
 
 \begin_layout Standard
-Looking to figure 
+When designing a centralised commercial product with services available
+ over the internet, the code to run those services cannot solely be run
+ in individual phone apps or on IOT-esque pieces of hardware.
+ The need for an authoritative store of information such as user details
+ and service specific information (location and charge station details)
+ requires a central instance of code to store information and make that
+ data available when properly authorised.
+\end_layout
+
+\begin_layout Standard
+The relationship between the code that the user interacts with directly
+ (mobile app, charging unit) and that which centrally controls the service
+ is described as the separation between the front-end and back-end of an
+ application.
+\end_layout
+
+\begin_layout Standard
+More precisely in the front-end/back-end model the back-end acts as the
+ data access layer (DAL), while the front-end is the presentation layer
+ for a service.
+ 
+\end_layout
+
+\begin_layout Section
+Infrastructure Architecture
+\end_layout
+
+\begin_layout Standard
+The architecture of cloud services utilised on GCP can be seen in figure
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:gcp-services"
@@ -478,10 +487,8 @@ noprefix "false"
 
 \end_inset
 
- Firestore was chosen as the data storage element of the final architecture.
- Although a propriety library must be used to interface with the database
- the library does have many benefits such as automatically authenticating
- database actions when code is running on deployed GCP services.
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -529,17 +536,29 @@ name "fig:gcp-services"
 \begin_layout Standard
 Google App Engine was used to host the Flask application in the standard
  environment which proves to be more than suitable for these requirements.
- This GAE applications provides the public web host name to interface with
+ This GAE application provides the public web hostname to interface with
  the mobile application and charging unit.
- Cloud Scheduler is used to run utility tasks for the service at regular
- intervals, during development two were defined.
- Each task is encapsulated withing a serverless Cloud Function which is
- triggered by subscribing to separate Cloud Pub/Sub queues.
- Cloud Scheduler can then publish messages to these queues.
+ 
 \end_layout
 
 \begin_layout Standard
-The access token refresh task is part of the authentication workflow
+The need for a database was fulfilled by Firestore.
+ Although a propriety SDK must be used to interface with the database, the
+ library does have many benefits such as automatically authenticating database
+ actions when code is running on deployed GCP services.
+\end_layout
+
+\begin_layout Standard
+Cloud Scheduler is used to run utility tasks for the service at regular
+ intervals, during development two were defined.
+ Each task is encapsulated within a serverless Cloud Function which is triggered
+ via subscription to separate Cloud Pub/Sub queues.
+ Cloud Scheduler can then publish messages to these queues for consumption.
+\end_layout
+
+\begin_layout Standard
+The access token refresh task is part of the authentication workflow, described
+ further in section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:Authentication"
@@ -550,9 +569,9 @@ noprefix "false"
 \end_inset
 
 .
- The confidential keys used to authenticate with the API should be refreshed
- periodically to reduce the value of any leaked keys, this function performs
- that refresh action.
+ In summary the confidential keys used to authenticate with the API should
+ be refreshed periodically to reduce the value of any leaked data, this
+ function performs that refresh action for all required users.
 \end_layout
 
 \begin_layout Standard
@@ -560,7 +579,7 @@ The reset queue tasks performs actions related to the semantics of the service.
  In the context of a workplace, the queue of users waiting for charging
  sessions should not necessarily roll over to the next day.
  Electric vehicle owners will typically charge their cars overnight leaving
- charging at work as a top up for the return commute.
+ charging at work to function as a top up for the return commute.
  As a result, if a user is not able to receive a session that day, it does
  not necessarily mean they would still want an available session the next
  day.
@@ -575,7 +594,7 @@ Each of the compute services being used, namely the GAE application and
 \end_layout
 
 \begin_layout Standard
-Final the Firebase SDK is used in order to deliver mobile notifications
+Finally the Firebase SDK is used in order to deliver mobile notifications
  to users.
 \end_layout
 
@@ -717,10 +736,6 @@ The score and it's associated time of last update are used by the queue
 \begin_layout Standard
 Check_password() takes a clear-text password string as input and returns
  a boolean value determining whether it is the same as the stored password.
- This works by salting and hashing the query password in the same fashion
- as the initial password was when supplied by the user.
- The hashes are compared for equality which also indicates that the two
- have the same clear-text values.
 \end_layout
 
 \begin_layout Subsection
@@ -838,12 +853,12 @@ RESTful Services
 \end_layout
 
 \begin_layout Standard
-When designing a web server an approach taking in to account REST architecture.
+When designing a web server it is worth considering REST architecture.
  REST or Representational State Transfer is a structure and ethos for designing
- web services.
- Each URL is treated as an identifier for a resource it describes.
- Making requests with different HTTP methods at this URL represents different
- actions to be taken on the object that URL identifies.
+ web services that defines the semantics of what each URL means.
+ Each URL is treated as an identifier for a resource it describes, making
+ requests with different HTTP methods at this URL represents different actions
+ to be taken on the object that URL identifies.
  The most common methods are GET, POST, PUT and DELETE.
 \end_layout
 
@@ -1061,56 +1076,35 @@ Authentication is a crucial concern when designing web services.
  however they are useless if weak authentication allows them to be circumvented.
  There are many ways to secure a HTTP API that range in security and complexity,
  finding a balance for the context of the service is important.
-\end_layout
-
-\begin_layout Standard
-Most methods of authentication eventually authenticate each request using
- a HTTP header with the 
-\begin_inset Quotes eld
-\end_inset
-
-Authorization
-\begin_inset Quotes erd
-\end_inset
-
- key of key-value pairs.
- The value of this header prescribes which method is being used.
-\end_layout
-
-\begin_layout Subsubsection
-Basic Auth
-\end_layout
-
-\begin_layout Standard
-One of the most basic methods for authenticating with a HTTP is named as
- such, basic access authentication.
- Basic auth sends the username and password for a user within the authorization
- header in the following format,
-\end_layout
-
-\begin_layout Quote
-Basic 
-\emph on
-base64_encode(<username>:<password>)
-\end_layout
-
-\begin_layout Standard
-Base64 encoding is a binary-to-text encoding method and is not a form of
- encryption or hashing, any agent with the content of the request can trivially
- get access to the cleartext user credentials.
  
 \end_layout
 
 \begin_layout Standard
-When ensuring, as this service does, that all requests of the API are encrypted
- using TLS, these credentials are secure in transit, however this is not
- the only attack surface which should be protected.
- It also requires the requesting agent to have access to the user's cleartext
- password for inclusion with each request.
- There is inherent risk if each HTTP request includes the unencrypted user
- password and ideally it should occur as little as possible.
- Basic authentication was used during the beta development but eventually
- a more secure method was used for release.
+Authentication describes the methods by which a user interacting with the
+ API proves they are who they say they are.
+ This is separate to the process of authorization which describes the process
+ of proving that a user is able to do what they are trying to do.
+ This difference is relevant when considering the intricacies of more complex
+ security architectures however for these purposes both are done at the
+ same time.
+ 
+\end_layout
+
+\begin_layout Standard
+Most methods of authentication eventually authenticate each request using
+ a HTTP header with the “Autho- rization” key of key-value pairs.
+ The value of this header prescribes which method is being used.
+ 
+\end_layout
+
+\begin_layout Standard
+During development basic authentication was used, this involves sending
+ the username and password for the requesting user in the header of each
+ request.
+ This however requires the client to keep unprotected forms of the user
+ credentials to be ready for inclusion in each request and must be used
+ in conjunction with HTTPS to protect them from interception.
+ For release a more secure form of authentication was used, bearer tokens.
 \end_layout
 
 \begin_layout Subsubsection
@@ -1142,39 +1136,29 @@ Bearer tokens in one form or another are the most common form of authorisation
  OAuth describes an architecture for API authorization however while being
  a proven structure, the system is fairly complex and has an emphasis on
  allowing third party services delegated access to user information, something
- that wouldn't be required for a service that expects only first party access.
- OAuth is also first and foremost an authorization protocol with use for
- authentication requiring extra steps that take it out of scope for this
- application.
+ that wouldn’t be required for a service that expects only first party access.
+ 
 \end_layout
 
 \begin_layout Standard
 This service uses a simpler implementation of bearer tokens with each user
  having a unique and randomly generated key stored with their user information.
  Tokens for accounts representing physical people are refreshed on a weekly
- basis, in doing so any compromised key has it's value reduced as a result
- of it's limited life time.
+ basis, in doing so any compromised key has it’s value reduced as a result
+ of it’s limited life time.
  Keys are not rotated for service accounts as the charging units are expected
  to run without user interaction.
  While users can log back into the app when their token expires, having
  charger unit keys expire in this way would require a workflow to supply
  new keys.
+ 
 \end_layout
 
 \begin_layout Standard
 A more advanced system for refreshing charging unit keys could be based
- on a chain of public key certificates similar to the way that web servers
- and websites prove their identity when using TLS.
- The service could keep control of a root certificate that is used to sign
- further certificates.
- Each charger unit would be entrusted with it's own derivative certificate
- used to sign requests for new tokens.
- This would allow service account tokens to be refreshed as they now have
- a trusted mechanism to retrieve new tokens.
- Charger certificates deemed to be compromised could be revoked requiring
- a unit's certificate to be reset and regenerated.
- This could be done using a physical key such as a USB stick containing
- it's own derivative certificate.
+ on a system of public key certificates similar to the way that web servers
+ and websites prove their identity when using TLS, however this would require
+ further investigation and discussion.
 \end_layout
 
 \begin_layout Section
@@ -1230,8 +1214,299 @@ The service that is most likely to be used beyond it's free quotas is that
 us traffic to the service and require more running instances.
 \end_layout
 
+\begin_layout Standard
+As a result, the price can be seen to be extremely reasonable for smaller
+ services and the pay-as-you-go nature of invoicing is a significant advantage
+ of the serverless technology used.
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Standard
+An example JSON output from GETting location information can be seen in
+ appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Results"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ The Flask server proved extremely flexible in designing and implementing
+ the required URL routes.
+ The un-opinionated nature with respect to the handling of database connections
+ was a strength when Firestore requires a proprietary SDK to be used, a
+ simple database layer was written to match much of what would be achieved
+ with a traditional Object-Relation Mapping (ORM).
+ Worth noting however is that this was not as fast as industry standard
+ libraries such as SQL-alchemy could provide, reading and writing to the
+ database were the slowest aspects of the program and could definitely be
+ optimised further.
+ This architecture was achieved while remaining within the free quotas for
+ all services making the development process free.
+\end_layout
+
+\begin_layout Section
+Future Work
+\end_layout
+
+\begin_layout Standard
+The back-end has room for development, future work could develop both the
+ infrastructure and the source code itself.
+ The infrastructure could be extended by increasing the utilisation of serverles
+s functions and by considering the AI and IOT products provided by the platform.
+ 
+\end_layout
+
+\begin_layout Standard
+The source code has more room for improvement, specifically the database
+ layer could be optimised as it is currently the bottleneck for typical
+ use.
+ Retrieving a session, for example, involves first retrieving its parent
+ charger and location which slows down processing.
+\end_layout
+
+\begin_layout Standard
+Additionally the authentication scheme could be developed.
+ While the bearer tokens as implemented are suitable, more complex systems
+ have significant advantages.
+ Specifically the use of JWTs would decrease processing time and provide
+ more authentication information from a debugging and security perspective.
+\end_layout
+
+\begin_layout Section
+Summary and Future Work
+\end_layout
+
+\begin_layout Standard
+An array of cloud computing services have been orchestrated into a system
+ functioning as the back-end for the scheduling project.
+\end_layout
+
+\begin_layout Standard
+An HTTP server provides the public gateway to data contained within a database.
+ At each point services built with modern architectures provided by the
+ serverless philosophy have been used effectively to keep the system simple
+ and the cost free.
+ 
+\end_layout
+
+\begin_layout Standard
+The security of the architecture has also been considered, both in the context
+ of those aspects abstracted away through the infrastructure choices and
+ those which are part of the service itself.
+\end_layout
+
+\begin_layout Standard
+Costs for running the service were shown to be free for small scale deployment
+ and reasonably priced if usage were to increase, the services most likely
+ to begin costing money were laid out.
+\end_layout
+
+\begin_layout Standard
+Finally the space for development is presented, highlighting the investigations
+ that could be made both into the infrastructure and the source code itself.
+\end_layout
+
+\begin_layout Standard
+Despite these areas the final product successfully fulfils the specifications
+ for cloud data storage in a stable and self-descriptive manner.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
 \begin_layout Part
 Discussion and Conclusions
+\end_layout
+
+\begin_layout Section
+Discussions
+\end_layout
+
+\begin_layout Subsection
+Environmental Impacts
+\end_layout
+
+\begin_layout Standard
+While ostensibly being a response to the future of mobility grand challenge,
+ the subject of the project being electric vehicles has obvious links with
+ the environment and as such the wider environmental effects should be considere
+d.
+ While it is important to consider the direct sustainability, as has been
+ done earlier, it is also worth investigating how the service encourages
+ through it’s existence and use.
+ 
+\end_layout
+
+\begin_layout Standard
+Initially it could be considered that the wider use of a vehicle charge
+ management system would be positive.
+ This would come as a result of the incentive provided by being able to
+ charge a user’s car while at locations such as a workplace with limited
+ spaces.
+ As a result, the members of the workplace could be more likely to use electric
+ vehicles over the alternative and the use of fossil fuelled cars would
+ decrease.
+ 
+\end_layout
+
+\begin_layout Standard
+However the service is designed to allow as much car charging as possible
+ throughout the day.
+ When a user’s car is full they are required to move it so another user
+ can make use of the charging unit.
+ This is as opposed to when a car charging space without such a management
+ system is used, the user would probably not move the car throughout the
+ day and so when the car has finished charging, the draw of power will stop.
+ 
+\end_layout
+
+\begin_layout Standard
+Almost ironically the use of such an environmentally-minded service could
+ actually increase the amount of power being used.
+ At a time when the majority of power generated in the UK still comes from
+ fossil fuels the overall effect could be negative.
+ It is worth defining, then, the point of such a service and how it responds
+ to the grand challenge it aims to solve.
+\end_layout
+
+\begin_layout Subsection
+The Future of Mobility Grand Challenge
+\end_layout
+
+\begin_layout Standard
+The scheduling service is intended to incentivise the use of electric vehicles
+ by making it easier to charge them at a time where EVs are still, to an
+ extent, in an immature state.
+ As the amount of energy generated through renewables increases, the weight
+ of the aforementioned negative impact is reduced while the energy sources
+ of the assumed larger population of electric vehicles are made more sustainable.
+ To directly respond to the grand challenge, this service aims to improve
+ the future of mobility by easing the adoption of a new form of travel in
+ electric vehicles.
+ 
+\end_layout
+
+\begin_layout Standard
+The main drawbacks of EVs in comparison to their traditional fossil fuel
+ counterparts are the frequency with which the battery must be charged,
+ the length of time it takes to charge the battery and the availability
+ of battery charging infrastructure.
+ This service aims to allow the most efficient use of limited charging infrastru
+cture such that EV owners can reduce the effects of these disadvantages
+ and further encourage this emerging technology.
+ While the above could demonstrate a larger draw of electricity at a time
+ where this is still predominantly unsustainable, it ultimately promotes
+ the adoption of a technology that will benefit from better sourced electricity
+ in the future.
+\end_layout
+
+\begin_layout Subsection
+User Behaviour
+\end_layout
+
+\begin_layout Standard
+Another aspect of the service worth considering is the way in which bad
+ faith interaction is reacted to and punished by the service.
+ This negative behaviour would include actions such as delaying the start
+ of a charging session when a user is selected and leaving a full car in
+ the charging spot following the completion of a session.
+ 
+\end_layout
+
+\begin_layout Standard
+The aim of a user’s score is to punish bad actors by reducing their ability
+ to get further sessions, this leaves the service to be utilised by users
+ more willing to properly engage with the service’s environment.
+ 
+\end_layout
+
+\begin_layout Standard
+The user’s score, however, only affects a user within the context of the
+ service.
+ When considering the reasons for such “bad” interactions in a workplace
+ environment many would be justifiable.
+ 
+\end_layout
+
+\begin_layout Standard
+Overrunning meetings or time sensitive work are both common and when considering
+ how the service is ultimately a utility for the company owning the charging
+ spots, few if any would prioritise the interactions with the car charging
+ structure over the work being completed by the employee for that company.
+ 
+\end_layout
+
+\begin_layout Standard
+This highlights both how reliant the service is on users engaging in good
+ faith to facilitate smooth operation and how the service could be susceptible
+ to abuse.
+\end_layout
+
+\begin_layout Subsection
+Group Work
+\end_layout
+
+\begin_layout Standard
+Development of the three aspects of the service - the hardware unit, mobile
+ application and cloud services were, in general, developed separately with
+ a process of integration and final testing to assemble the final product.
+ 
+\end_layout
+
+\begin_layout Standard
+This, in combination with a group structure that loosely divided between
+ the software and hardware for the most frequent communication led to some
+ integration issues that, with hindsight, could have benefited from a more
+ collaborative approach or project management style.
+ Each of the three aspects, however, did achieve their individual aims and
+ provided the best components with which to complete the integrations.
+\end_layout
+
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+As part of this project a service has been designed and implemented allowing
+ the dynamic scheduling of electric vehicle charging time.
+ In doing so, the shared use of limited spaces with charging units can be
+ systematically managed and used more efficiently than the alternative.
+ 
+\end_layout
+
+\begin_layout Standard
+Integrating the hardware unit with the native J1772 protocol of the existing
+ charging infrastructure allows intuitive sessions to be defined by the
+ subject vehicle as opposed to predefined time windows, further improving
+ the efficacy of the service.
+ 
+\end_layout
+
+\begin_layout Standard
+The use of industry leading cloud platforms allowed a back-end service to
+ be created that is highly available, can scale automatically with demand
+ and could naturally operate at a global scale were it required.
+ 
+\end_layout
+
+\begin_layout Standard
+The Android mobile application provides a natural user interface for that
+ back-end while the use of mobile notifications makes the entire experience
+ responsive.
+ Discussion’s above highlight the relevance of this work to the grand challenge
+ it aims to contribute to whilst also demonstrating the limitations of the
+ design.
 \end_layout
 
 \begin_layout Standard
@@ -1240,6 +1515,30 @@ LatexCommand bibtex
 btprint "btPrintCited"
 bibfiles "references"
 options "bibtotoc"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Results
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Results"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename example-output.png
+	lyxscale 30
+	width 70col%
 
 \end_inset
 
