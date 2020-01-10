@@ -14,11 +14,10 @@ fire_admin = firebase_admin.initialize_app()
 
 restingScore = 500.0
 ddtInactive = 0.00694444444  # +/-25 per hour, tends towards restingScore (500)
-ddtIn_Queue = -ddtInactive
-ddtAssigned = -10*ddtInactive
-ddtConnected_Charging = ddtInactive
-ddtConnected_Full = ddtInactive
-
+ddtIn_Queue = 2*ddtInactive  # +50 per hour
+AssignedFixedPenalty = 450.0 
+ddtConnected_Charging = 3*ddtInactive #-75 per hour
+ddtConnected_Full = 6*ddtInactive     #-150 per hour
 
 class User:
     class Type(Enum):
@@ -214,7 +213,7 @@ class User:
     def update_score(self, time: datetime):
         self.score_last_updated = time
         time_diff = (time - self.score_last_updated).total_seconds()
-        # INACTIVE - score tends towards Resting Score
+        # INACTIVE - score tends towards Resting Score (default 500) at +/-25 per hour.
         if self.state == self.State.inactive:
             if self.score > restingScore:
                 self.score = self.score - ddtInactive*time_diff
@@ -224,28 +223,18 @@ class User:
                 self.score = self.score + ddtInactive*time_diff
                 if self.score > restingScore:
                     self.score = restingScore
-        # IN_QUEUE - score tends towards 0
+        # IN_QUEUE - score increases at +50 per hour
         elif self.state == self.State.in_queue:
             self.score = self.score + ddtIn_Queue*time_diff
-        if self.score < 0:
-            self.score = 0
         # ASSIGNED - Score increases rapidly!
-        # Think about implementing a timeout - ie user moves to Inactive if they don't plug in after say one hour.
-        # Timeout time should be parameterized, specific to each location.
+        # The AssignedFixedPenalty is implemented in function assignedFixedPenalty.
         elif self.state == self.State.assigned:
-            self.score = self.score + ddtAssigned*time_diff
-        # CHARGING - score tends towards Resting Score.
+            self.score = self.score
+        # CHARGING - score decreases at a rate of -75 per hour.
         elif self.state == self.State.connected_charging:
-            if self.score > restingScore:
-                self.score = self.score - ddtConnected_Charging*time_diff
-                if self.score < restingScore:
-                    self.score = restingScore
-        if self.score < restingScore:
-            self.score = self.score + ddtConnected_Charging*time_diff
-            if self.score > restingScore:
-                self.score = restingScore
-        # FULL - Score increases rapidly!
-        # Penalises those who let their car stay connected for long periods of time.
-        # Think about implementing an offset to only start increasing score after a certain amount of time.
+            self.score = self.score - ddtConnected_Charging*time_diff
+            if self.score < 0:
+                self.score = 0
+        # FULL - score decreases at a rate of -150 per hour.
         elif self.state == self.State.connected_full:
-            self.score = self.score + ddtConnected_Full*time_diff
+            self.score = self.score - ddtConnected_Full*time_diff
