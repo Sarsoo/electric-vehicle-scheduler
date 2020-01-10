@@ -34,6 +34,11 @@ def get_users():
 def get_user(username: str) -> Optional[User]:
     logger.debug(f'retrieving {username}')
 
+    if username is not None:
+        username = username.lower()
+    else:
+        return None
+
     users = [i for i in db.collection(u'user').where(u'username', u'==', username).stream()]
 
     if len(users) == 0:
@@ -79,6 +84,8 @@ def create_user(username: str,
                 user_type: User.Type) -> None:
 
     logger.debug(f'creating {username}')
+
+    username = username.lower()
 
     user_collection = db.collection(u'user')
 

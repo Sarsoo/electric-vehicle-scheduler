@@ -32,20 +32,26 @@ def login():
         }), 400
 
     user = database.get_user(request_json['username'])
-    if user.check_password(request_json['password']):
-        if user.access_token is None:
-            user.refresh_access_token()
+    if user is not None:
+        if user.check_password(request_json['password']):
+            if user.access_token is None:
+                user.refresh_access_token()
 
-        return jsonify({
-            'message': 'password match',
-            'token': user.access_token,
-            'status': 'ok'
-        }), 200
+            return jsonify({
+                'message': 'password match',
+                'token': user.access_token,
+                'status': 'ok'
+            }), 200
+        else:
+            return jsonify({
+                'message': 'password mismatch',
+                'status': 'error'
+            }), 401
     else:
         return jsonify({
-            'message': 'password mismatch',
+            'message': 'username not found',
             'status': 'error'
-        }), 401
+        }), 404
 
 
 @blueprint.route('/logout', methods=['GET'])
