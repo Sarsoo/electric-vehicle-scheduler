@@ -35,7 +35,7 @@ todonotes
 \output_sync 0
 \bibtex_command biber
 \index_command default
-\paperfontsize default
+\paperfontsize 11
 \spacing single
 \use_hyperref false
 \papersize default
@@ -81,11 +81,12 @@ todonotes
 \papercolumns 1
 \papersides 1
 \paperpagestyle fancy
-\tracking_changes false
+\tracking_changes true
 \output_changes false
 \html_math_output 0
 \html_css_as_file 0
 \html_be_strict false
+\author 2090082705 "andy"
 \end_header
 
 \begin_body
@@ -112,34 +113,59 @@ Hypertext Transfer Protocol (HTTP)
 \end_layout
 
 \begin_layout Standard
-The core of the backend services in the context of this project is an HTTP
- (Hypertext Transfer Protocol) server.
+The core of the backend services in the context of this project is a
+\change_deleted 2090082705 1578870809
+n
+\change_unchanged
+ HTTP (Hypertext Transfer Protocol) server.
  When running, a server is available at a hostname (http://google.com) which
  can be queried over the internet.
  HTTP servers are ubiquitous on the internet and most internet communications
  from retrieving websites to using web connected mobile apps and streaming
  video takes place between a client and an HTTP server.
+
+\change_deleted 2090082705 1578919990
  An HTTP server can be run locally on a PC but requires proper hosting in
  order to allow communications over the public internet.
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
 Apart from their direct use by the user in websites and video streaming,
  HTTP can also be used to form APIs (Application Programming Interface)
- where text is instead sent back and forth to represent actions in a service.
+ where 
+\change_inserted 2090082705 1578920045
+structured 
+\change_unchanged
+text is instead sent back and forth to represent actions in a service.
 \end_layout
 
 \begin_layout Standard
 At a high level HTTP APIs typically act as a layer of logic between users
  and databases for data persistence.
+
+\change_inserted 2090082705 1578875742
+ Although being a newer environment, Python presents a wide ecosystem for
+ developing HTTP APIs with it's WSGI (Web Server Gateway Interface) interface,
+ the cross-framework standard for handling HTTP requests.
+ Of these frameworks Flask was chosen for it's lightweight and flexible
+ environment coupled with it's un-opinionated nature with regards to database
+ connections.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Section
+
+\change_deleted 2090082705 1578875581
 Development Language
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578875581
 There are many languages well suited to writing HTTP servers from well establish
 ed ecosystems like PHP, Java and Ruby to newer environments such as Python
  and Javascript using Node.js.
@@ -149,6 +175,8 @@ ed ecosystems like PHP, Java and Ruby to newer environments such as Python
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578875581
 Libraries for creating HTTP applications in Python typically implement the
  Web Server Gateway Interface (WSGI), an interface for passing web requests
  from the web server which hosts the application to the application itself.
@@ -157,6 +185,8 @@ Libraries for creating HTTP applications in Python typically implement the
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578875581
 Two of the most popular frameworks are Flask
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -174,9 +204,13 @@ literal "false"
 \end_inset
 
 .
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578870849
 Django has a strong database abstraction layer and is 
 \begin_inset Quotes eld
 \end_inset
@@ -193,6 +227,8 @@ somewhat-opinionated
  structure and flexibility proves to be agile and very powerful.
  For these reasons Flask was chosen for implementing the WSGI interface.
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Section
@@ -232,9 +268,19 @@ Deploying an HTTP server to the public internet can be done in various ways.
  One of the more established but manual approaches is to create a Linux
  virtual machine on which WSGI applications can be started using a WSGI
  server like Gunicorn.
- This presents one of the most manual methods requiring careful Linux administra
-tion to create a secure public facing server, the growth of cloud computing
- platforms has removed the requirement for such overhead.
+ This
+\change_deleted 2090082705 1578920101
+ presents one of the most manual methods
+\change_unchanged
+ requir
+\change_inserted 2090082705 1578920103
+es
+\change_deleted 2090082705 1578920105
+ing
+\change_unchanged
+ careful Linux administration to create a secure public facing server, the
+ growth of cloud computing platforms has removed the requirement for such
+ overhead.
  
 \end_layout
 
@@ -255,8 +301,13 @@ serverless
 
 .
  There are many different types of service using the architecture with the
- most popular being function-as-a-service or FaaS, the AWS and GCP products
- being Lambda functions and Cloud functions respectively.
+ most popular being function-as-a-service or FaaS, 
+\change_inserted 2090082705 1578921221
+branded Cloud Functions on GCP
+\change_deleted 2090082705 1578920196
+the AWS and GCP products being Lambda functions and Cloud functions respectively
+\change_unchanged
+.
  FaaS services allow users to write and deploy individual functions or methods
  of source code to be run by a trigger.
  
@@ -266,8 +317,12 @@ serverless
 These triggers can include database state changes, asynchronous message
  queues or HTTP requests providing single functions with unique URLs to
  trigger them.
- HTTP triggers theoretically allow users to write entire APIs with endpoints
+ 
+\change_deleted 2090082705 1578870990
+HTTP triggers theoretically allow users to write entire APIs with endpoints
  as individual functions.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -277,9 +332,13 @@ PaaS
 \begin_layout Standard
 Platform as a service or PaaS is a similar architecture retaining many of
  the advantages of serverless products.
- It is a step towards the more manual approaches and implements the serverless
+ 
+\change_deleted 2090082705 1578871038
+It is a step towards the more manual approaches and implements the serverless
  ethos in a different way.
- To compare to FaaS which provides serverless hosting for individual methods
+ 
+\change_unchanged
+To compare to FaaS which provides serverless hosting for individual methods
  of source code, PaaS can be seen as serverless hosting of entire WSGI applicati
 ons when working in Python.
  In doing so the advantages of serverless hosting such as reduced configuration
@@ -319,6 +378,8 @@ For example GAE provides automatic horizontal scaling allowing the number
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578871079
 GAE also makes using TLS security extremely easy.
  With a manual hosting set-up, TLS security can be included by attaching
  a certificate to the hosting web server, either purchased from a certificate
@@ -326,6 +387,8 @@ GAE also makes using TLS security extremely easy.
  It is also advisable to include a rule within the web server in order to
  redirect unencrypted HTTP traffic on port 80 to encrypted HTTPS traffic
  on port 443.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
@@ -343,6 +406,8 @@ Database
 GCP has many options for database services depending on the requirements.
  For both SQL and NoSQL, GCP has databases designed to operate at different
  scales and with different features.
+
+\change_deleted 2090082705 1578875125
  For example, Cloud SQL offers managed MySQL, PostgreSQL and SQL server
  instances with ultra low latency for smaller scale use but Cloud Spanner
  offers scalable SQL instances designed to be highly consistent at a global
@@ -351,30 +416,44 @@ GCP has many options for database services depending on the requirements.
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578875124
 Equally, for NoSQL there are two main options.
  Cloud Bigtable offers global scale NoSQL database instances able to handle
  petabyte sized datasets designed for analytical big data workloads.
  Alternatively, Cloud Firestore is a new service from GCP under the Firebase
  brand banner.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
-Being marketed as the flagship NoSQL product, Firestore has key integrations
- with the rest of the GCP services, for example Cloud Functions can be triggered
- directly by changes within the database and Firebase provides authenticated
- access to the data from within mobile applications.
+Being marketed as the 
+\change_inserted 2090082705 1578875139
+new 
+\change_unchanged
+flagship NoSQL product, Firestore has key integrations with the rest of
+ the GCP services, for example Cloud Functions can be triggered directly
+ by changes within the database and Firebase provides authenticated access
+ to the data from within mobile applications.
 \end_layout
 
 \begin_layout Standard
 Firestore is also highly scalable and consistent as a result of it's serverless
  architecture.
+\change_deleted 2090082705 1578874561
+
 \end_layout
 
 \begin_layout Subsection
+
+\change_deleted 2090082705 1578874561
 Mobile Notifications
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578874561
 Mobile notifications are a useful tool for providing instant messages and
  updates to a user having superseded the previously accepted methods of
  email and SMS messages.
@@ -382,6 +461,8 @@ Mobile notifications are a useful tool for providing instant messages and
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578874561
 While mobile applications can locally generate notifications, a more useful
  method of using notifications is for them to be generated and delivered
  by a cloud based service and transmitted over the internet.
@@ -391,6 +472,8 @@ While mobile applications can locally generate notifications, a more useful
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578874561
 Due to the architecture of delivery and display when pushed over the internet,
  notification systems are usually part of the mobile operating system such
  as Firebase Cloud Messaging for Android and Apple Push Notification Service
@@ -398,6 +481,8 @@ Due to the architecture of delivery and display when pushed over the internet,
  Using Firebase Cloud Messaging messages can be sent to individual devices
  or groups of devices, the former being identified using a device specific
  key.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsection
@@ -408,7 +493,13 @@ Cloud Pub/Sub
 Within a cloud system, the ability to orchestrate different aspects of the
  architecture can be facilitated by sending messages between services.
  This allows asynchronous updates and the spawning of tasks while maintaining
- inde- pendence of different parts of the architecture.
+ 
+\change_inserted 2090082705 1578919774
+independence 
+\change_deleted 2090082705 1578919771
+inde- pendence 
+\change_unchanged
+of different parts of the architecture.
  A widely useful way to do this is by creating a communication channel within
  which messages can be published and subscribed to.
  Cloud Pub/Sub is a GCP service facilitating this form of communication.
@@ -425,10 +516,14 @@ In order to fully utilise a serverless architecture as described above,
 \end_layout
 
 \begin_layout Subsection
+
+\change_deleted 2090082705 1578871221
 Scheduling
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578872912
 When operating a system of larger scale, typically there will be tasks required
  to run repeatedly at predefined time intervals.
  Cloud Scheduler is a service within the Google Cloud Platform taking inspiratio
@@ -437,9 +532,13 @@ n from the Unix tool, Cron, allowing commands to be run in the background
  Cloud Scheduler uses the same string format defining time schedules and
  has many different actions including Google App Engine URL endpoints and
  publishing messages to Pub/Sub message channels.
+\change_inserted 2090082705 1578874739
+
 \begin_inset Newpage newpage
 \end_inset
 
+
+\change_unchanged
 
 \end_layout
 
@@ -469,6 +568,17 @@ More precisely in the front-end/back-end model the back-end acts as the
  data access layer (DAL), while the front-end is the presentation layer
  for a service.
  
+\change_inserted 2090082705 1578874657
+
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 2090082705 1578921400
+The source code for the cloud services module can be seen at https://github.com/S
+arsoo/ee3035-ev-scheduler.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Section
@@ -550,7 +660,13 @@ The need for a database was fulfilled by Firestore.
 
 \begin_layout Standard
 Cloud Scheduler is used to run utility tasks for the service at regular
- intervals, during development two were defined.
+ intervals, 
+\change_deleted 2090082705 1578872126
+during development two were defined
+\change_inserted 2090082705 1578872165
+these tasks can be in the form of messages published to Cloud Pub/Sub queues
+\change_unchanged
+.
  Each task is encapsulated within a serverless Cloud Function which is triggered
  via subscription to separate Cloud Pub/Sub queues.
  Cloud Scheduler can then publish messages to these queues for consumption.
@@ -569,9 +685,13 @@ noprefix "false"
 \end_inset
 
 .
+
+\change_deleted 2090082705 1578875094
  In summary the confidential keys used to authenticate with the API should
  be refreshed periodically to reduce the value of any leaked data, this
  function performs that refresh action for all required users.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
@@ -590,12 +710,23 @@ The reset queue tasks performs actions related to the semantics of the service.
 \begin_layout Standard
 Each of the compute services being used, namely the GAE application and
  the serverless functions can be configured to use the centralised logging
- provided by GCP allowing intuitive log review.
+ provided by GCP allowing intuitive 
+\change_deleted 2090082705 1578921480
+log 
+\change_unchanged
+review.
 \end_layout
 
 \begin_layout Standard
-Finally the Firebase SDK is used in order to deliver mobile notifications
- to users.
+Finally the Firebase SDK is used in order to deliver mobile 
+\change_inserted 2090082705 1578874582
+push 
+\change_unchanged
+notifications to users
+\change_inserted 2090082705 1578874590
+ using the Firebase Cloud Messaging API
+\change_unchanged
+.
 \end_layout
 
 \begin_layout Section
@@ -662,12 +793,25 @@ name "fig:class-diagram"
 
 \begin_layout Subsection
 User
+\change_inserted 2090082705 1578874034
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:User"
+
+\end_inset
+
+
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
 Users have associated usernames and passwords for identification and authenticat
 ion.
  Usernames are the primary key differentiating objects and are case insensitive.
+
+\change_deleted 2090082705 1578875036
  Passwords are salted and hashed using the Werkzeug security functionality,
  for more information see section 
 \begin_inset CommandInset ref
@@ -681,6 +825,8 @@ noprefix "false"
 
 .
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
@@ -697,6 +843,8 @@ Defining user types allowed the implementation of access controls between
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578875016
 The state of the user is defined by the life-cycle of a charging session
  as described in the associated enumerated type.
  Using Python properties, specific state changes for a user have associated
@@ -705,6 +853,8 @@ The state of the user is defined by the life-cycle of a charging session
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578871445
 Users have an access token field and associated last updated time in order
  to secure the HTTP API, the authentication methods used are covered in
  section 
@@ -721,6 +871,8 @@ noprefix "false"
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578871445
 The score and it's associated time of last update are used by the queue
  system in order to determine priorities when selecting the next users for
  a session slot.
@@ -734,8 +886,12 @@ The score and it's associated time of last update are used by the queue
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578871445
 Check_password() takes a clear-text password string as input and returns
  a boolean value determining whether it is the same as the stored password.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsection
@@ -743,8 +899,29 @@ Charging Structure
 \end_layout
 
 \begin_layout Standard
-The layout for charging architecture defines two object modelling physical
- structure and a session object.
+The
+\change_deleted 2090082705 1578917910
+ layout for 
+\change_inserted 2090082705 1578874082
+ 
+\change_unchanged
+charging architecture 
+\change_inserted 2090082705 1578917912
+is 
+\change_unchanged
+define
+\change_inserted 2090082705 1578917914
+d
+\change_deleted 2090082705 1578917914
+s
+\change_inserted 2090082705 1578917916
+ by
+\change_unchanged
+ two object
+\change_inserted 2090082705 1578874088
+s
+\change_unchanged
+ modelling physical structure and a session object.
  A Location defines a physical location at which are found charging stations.
  An office building with electric vehicle parking spaces would be a Location
  as would be a multi-storey car park.
@@ -765,13 +942,30 @@ A Session defines a discrete charging window completed by a user.
  they can remove their car.
  When a user unplugs the car the session ends and ticks the location's queue
  to select the next user.
+\change_inserted 2090082705 1578874146
+
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 2090082705 1578874375
+Locations and chargers have string IDs while session IDs are integers.
+ This is the done so sessions can be stored for logging purposes following
+ completion and new session IDs can be generated easier by iterating the
+ max value of the saved IDs.
+\change_deleted 2090082705 1578874123
+
 \end_layout
 
 \begin_layout Subsubsection
+
+\change_deleted 2090082705 1578874123
 Location
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578874123
 A Location has a location_id to act as the primary key, they are case insensitiv
 e.
  A location has a list of contained chargers and a list of users representing
@@ -783,10 +977,14 @@ e.
 \end_layout
 
 \begin_layout Subsubsection
+
+\change_deleted 2090082705 1578874123
 Charger
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578874123
 A Charger's associated charger_id differentiates chargers of a location,
  they are unique to that location's namespace.
  The active session field is for the integer session_id of the currently
@@ -797,10 +995,14 @@ A Charger's associated charger_id differentiates chargers of a location,
 \end_layout
 
 \begin_layout Subsubsection
+
+\change_deleted 2090082705 1578874123
 Session
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578874123
 Sessions are retained after their end for logging purposes, as such integer
  session IDs were selected in order to allow easier retrieval of new IDs.
  To do so the maximum value of all available IDs is incremented.
@@ -810,14 +1012,20 @@ Sessions are retained after their end for logging purposes, as such integer
 \end_layout
 
 \begin_layout Quote
+
+\change_deleted 2090082705 1578874123
 location1:charger1:5
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578874123
 Due to the use of IDs in request URLs and the fully qualified ID, colons,
  spaces and forward slashes are illegal characters for all three IDs.
  Sessions have date-time objects for both their start and end time and a
  reference to the User object who owns the session.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Section
@@ -840,8 +1048,11 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-Routes are registered using a function decorator provided by the application
- defining that method with a URL string pattern to match requests.
+Routes are registered using a function decorator 
+\change_deleted 2090082705 1578921604
+provided by the application 
+\change_unchanged
+defining that method with a URL string pattern to match requests.
  The return value of the method is passed back to the HTTP requester as
  the response.
  This decorator takes both the intended route string pattern and the available
@@ -853,9 +1064,32 @@ RESTful Services
 \end_layout
 
 \begin_layout Standard
-When designing a web server it is worth considering REST architecture.
- REST or Representational State Transfer is a structure and ethos for designing
- web services that defines the semantics of what each URL means.
+When designing a web server 
+\change_inserted 2090082705 1578921654
+a modern philosophy for doing so is the 
+\change_deleted 2090082705 1578921650
+it is worth considering 
+\change_unchanged
+REST architecture.
+ REST or Representational State Transfer is a 
+\change_deleted 2090082705 1578921692
+structure and ethos
+\change_inserted 2090082705 1578921694
+methodology
+\change_unchanged
+ 
+\change_deleted 2090082705 1578921700
+for designing web services that 
+\change_inserted 2090082705 1578921702
+for 
+\change_unchanged
+defin
+\change_inserted 2090082705 1578921705
+ing
+\change_deleted 2090082705 1578921703
+es
+\change_unchanged
+ the semantics of what each URL means.
  Each URL is treated as an identifier for a resource it describes, making
  requests with different HTTP methods at this URL represents different actions
  to be taken on the object that URL identifies.
@@ -865,6 +1099,11 @@ When designing a web server it is worth considering REST architecture.
 \begin_layout Standard
 GET is typically used as a read only method who's result is a text serialization
  of the object.
+
+\change_inserted 2090082705 1578921728
+ 
+\change_deleted 2090082705 1578921727
+
 \end_layout
 
 \begin_layout Standard
@@ -872,6 +1111,11 @@ The POST method is used to create an object while PUT is used to replace
  the object.
  For this API PUT is used to replace individual fields of some objects making
  the definition of PUT closer to update.
+
+\change_inserted 2090082705 1578921731
+ 
+\change_deleted 2090082705 1578921731
+
 \end_layout
 
 \begin_layout Standard
@@ -880,7 +1124,13 @@ DELETE is for deleting the object the URL denotes.
 
 \begin_layout Standard
 The aim of a RESTful web service is to make interacting with APIs consistent
- and intuitive both as a whole and when comparing different APIs.
+ and intuitive both 
+\change_inserted 2090082705 1578919560
+intrinsically
+\change_deleted 2090082705 1578919557
+as a whole
+\change_unchanged
+ and when comparing different APIs.
  It is similar to a design pattern.
 \end_layout
 
@@ -897,18 +1147,26 @@ noprefix "false"
 \end_inset
 
 .
+\change_deleted 2090082705 1578870647
+
 \end_layout
 
 \begin_layout Subsection
+
+\change_deleted 2090082705 1578870647
 Blueprints
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578870647
 A useful tool for encapsulating discrete parts of a Flask API that should
  still be part of a single application is to use blueprints.
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578870647
 Blueprints group a set of routes allowing them to be mounted on a Flask
  application object together.
  Blueprints have routes registered in a similar fashion as the Flask application
@@ -917,6 +1175,8 @@ Blueprints group a set of routes allowing them to be mounted on a Flask
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578870647
 Blueprints were used to separate routes for authentication, users and the
  charging structure in order to closely follow the data model, a visualisation
  of the final URL route map can be seen in figure 
@@ -930,6 +1190,8 @@ noprefix "false"
 \end_inset
 
 .
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
@@ -998,13 +1260,37 @@ Fortunately, using a serverless architecture abstracts away much of the
 \end_layout
 
 \begin_layout Standard
-The three main areas of this service requiring considerations from a security
- perspective are those of access controls, password handling and authentication.
- Access controls have been discussed above in the data model and layout
- of the HTTP API, it involves considering which users should be able to
- conduct what actions and what the implications of such access are.
+The three 
+\change_inserted 2090082705 1578921799
+remaining 
+\change_deleted 2090082705 1578921800
+main 
+\change_unchanged
+areas of this service requiring considerations from a security perspective
+ are those of access controls
+\change_inserted 2090082705 1578874039
+ (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:User"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+)
+\change_unchanged
+, password handling and authentication.
+ 
+\change_deleted 2090082705 1578874010
+Access controls have been discussed above in the data model and layout of
+ the HTTP API, it involves considering which users should be able to conduct
+ what actions and what the implications of such access are.
  For example ensuring that only system owned accounts, admin accounts and
  the user who owns a session can manipulate it.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsection
@@ -1021,16 +1307,29 @@ name "subsec:Passwords"
 \begin_layout Standard
 Passwords should never be stored at rest in the cleartext form they are
  provided by users as any breaches of the database will expose sensitive
- user information.
+ user information
+\change_inserted 2090082705 1578919470
+, instead to secure passwords they should undergo obfuscation processes
+ such as salting and hashing.
+\change_unchanged
+.
+
+\change_deleted 2090082705 1578919448
  The impact of such a breach would not only cover this service but could
  prove devastating for users who use the same password across websites (however
  unadvisable that is), this proves to be valuable attack vector for bad
  actors.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578919459
 To secure passwords they should undergo obfuscation processes such as salting
  and hashing.
+
+\change_unchanged
  Hashing is a one-way function that takes a variable length string and produces
  a reproducible fixed length output, the same input string always provides
  the same output string.
@@ -1045,16 +1344,27 @@ un-hashed
 
  back into the clear text string, even with knowledge as to what type of
  hashing was used.
- Cracking hashed passwords must instead be done with large tables of cleartext
- passwords and the associated precomputed hashes, this is known as a rainbow
- table attack.
+ Cracking hashed passwords must instead be done with
+\change_inserted 2090082705 1578919324
+ brute force methods called rainbow table attacks
+\change_deleted 2090082705 1578919340
+ large tables of cleartext passwords and the associated precomputed hashes,
+ this is known as a rainbow table attack.
  In order to protect against brute force attacks of this fashion, salts
  are additionally used.
  A salt is a random string of data that is appended to the user password
  before hashing and then stored with it.
  This reduces the effectiveness of a rainbow table attack as rainbow tables
  cannot practically be pre-calculated for input passwords when mangled by
- a random string in this way.
+ a random string in this way
+\change_unchanged
+.
+
+\change_inserted 2090082705 1578919376
+ Rainbow table attacks are mitigated through the use of salts, a random
+ string included with the password before hashing.
+
+\change_unchanged
  For this implementation passwords are salted using a 8 character long salt
  before being hashed using the pbkdf2:sha256 algorithm.
 \end_layout
@@ -1072,14 +1382,22 @@ name "sec:Authentication"
 
 \begin_layout Standard
 Authentication is a crucial concern when designing web services.
- Access controls and other security measures are important facets of a system
+ 
+\change_deleted 2090082705 1578873798
+Access controls and other security measures are important facets of a system
  however they are useless if weak authentication allows them to be circumvented.
- There are many ways to secure a HTTP API that range in security and complexity,
+ 
+\change_unchanged
+There are many ways to secure a HTTP API that range in security and complexity,
  finding a balance for the context of the service is important.
  
+\change_inserted 2090082705 1578918763
+
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578918753
 Authentication describes the methods by which a user interacting with the
  API proves they are who they say they are.
  This is separate to the process of authorization which describes the process
@@ -1088,16 +1406,27 @@ Authentication describes the methods by which a user interacting with the
  security architectures however for these purposes both are done at the
  same time.
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
 Most methods of authentication eventually authenticate each request using
- a HTTP header with the “Autho- rization” key of key-value pairs.
+ a HTTP header with the “
+\change_deleted 2090082705 1578873880
+Autho- rization
+\change_inserted 2090082705 1578873881
+Authorization
+\change_unchanged
+” key of key-value pairs.
  The value of this header prescribes which method is being used.
- 
+\change_deleted 2090082705 1578873898
+
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578873897
 During development basic authentication was used, this involves sending
  the username and password for the requesting user in the header of each
  request.
@@ -1105,6 +1434,8 @@ During development basic authentication was used, this involves sending
  credentials to be ready for inclusion in each request and must be used
  in conjunction with HTTPS to protect them from interception.
  For release a more secure form of authentication was used, bearer tokens.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -1113,7 +1444,10 @@ Bearer Token
 
 \begin_layout Standard
 A bearer token delegates the authentication authority from the user credentials
- themselves to a separate piece of secret information.
+\change_deleted 2090082705 1578873907
+ themselves
+\change_unchanged
+ to a separate piece of secret information.
  In doing so, the need to repeatably share user passwords or the derivatives
  of is removed.
  This additional piece of information is a string of characters typically
@@ -1133,19 +1467,32 @@ Bearer
 Bearer tokens in one form or another are the most common form of authorisation
  and authentication for web based APIs with standards such as OAuth (2.0)
  and JSON web tokens (JWT) being well regarded technologies in this space.
+
+\change_deleted 2090082705 1578875331
  OAuth describes an architecture for API authorization however while being
  a proven structure, the system is fairly complex and has an emphasis on
  allowing third party services delegated access to user information, something
  that wouldn’t be required for a service that expects only first party access.
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
-This service uses a simpler implementation of bearer tokens with each user
- having a unique and randomly generated key stored with their user information.
- Tokens for accounts representing physical people are refreshed on a weekly
- basis, in doing so any compromised key has it’s value reduced as a result
- of it’s limited life time.
+This service uses a simpler implementation of bearer tokens
+\change_inserted 2090082705 1578875353
+ than seen in larger architectures like OAuth 2.0
+\change_unchanged
+ with each user having a unique and randomly generated key stored with their
+ user information.
+ Tokens 
+\change_deleted 2090082705 1578875403
+for accounts representing physical people 
+\change_unchanged
+are refreshed on a weekly basis, in doing so any compromised key has it’s
+ value reduced as a result of it’s limited life time.
+
+\change_deleted 2090082705 1578875379
  Keys are not rotated for service accounts as the charging units are expected
  to run without user interaction.
  While users can log back into the app when their token expires, having
@@ -1155,10 +1502,14 @@ This service uses a simpler implementation of bearer tokens with each user
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578875369
 A more advanced system for refreshing charging unit keys could be based
  on a system of public key certificates similar to the way that web servers
  and websites prove their identity when using TLS, however this would require
  further investigation and discussion.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Section
@@ -1191,15 +1542,37 @@ literal "false"
 \end_inset
 
  an estimation of running costs can be obtained.
+\change_inserted 2090082705 1578873052
+
 \end_layout
 
 \begin_layout Standard
+
+\change_inserted 2090082705 1578918697
+When considering the reasonable usage of the service and the free quotas
+ available for each used product, It is not expected that any of the services
+ would require payment at low usage.
+ As interaction increases the first service that would likely require payment
+ would be the GAE app.
+ While the 28 instance hour per day limit is a healthy quota, high simultaneous
+ usage at commuting times and throughout the work day could require payment
+ for more instances.
+ Past this point, instances cost $0.06 per hour.
+\change_unchanged
+
+\end_layout
+
+\begin_layout Standard
+
+\change_deleted 2090082705 1578873049
 Firestore database allows 1GB of storage for free, a limit that with the
  scope of service required here would not be easily reached.
  It also allows 50,000 reads, 20,000 writes and 20,000 deletes a day.
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578873049
 The serverless Cloud Functions allow 2 million invocations a month for free
  with 400,000 GB-seconds memory, 200,000 GHz-seconds of compute time.
  Being used as a utility function for updating user access tokens means
@@ -1207,6 +1580,8 @@ The serverless Cloud Functions allow 2 million invocations a month for free
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578873049
 The service that is most likely to be used beyond it's free quotas is that
  of the App Engine.
  The App Engine provides 28 instance hours a day, while the service would
@@ -1215,9 +1590,13 @@ us traffic to the service and require more running instances.
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578873049
 As a result, the price can be seen to be extremely reasonable for smaller
  services and the pay-as-you-go nature of invoicing is a significant advantage
  of the serverless technology used.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Section
@@ -1225,8 +1604,13 @@ Results
 \end_layout
 
 \begin_layout Standard
-An example JSON output from GETting location information can be seen in
- appendix 
+An example JSON output from 
+\change_deleted 2090082705 1578920647
+GETting location information
+\change_inserted 2090082705 1578920647
+the API
+\change_unchanged
+ can be seen in appendix 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:Results"
@@ -1239,16 +1623,39 @@ noprefix "false"
 .
  The Flask server proved extremely flexible in designing and implementing
  the required URL routes.
- The un-opinionated nature with respect to the handling of database connections
- was a strength when Firestore requires a proprietary SDK to be used, a
- simple database layer was written to match much of what would be achieved
+ The un-opinionated 
+\change_inserted 2090082705 1578920682
+envrironment
+\change_deleted 2090082705 1578920682
+nature with respect to the handling of database connections
+\change_unchanged
+ was a strength 
+\change_deleted 2090082705 1578920689
+when
+\change_inserted 2090082705 1578920689
+as
+\change_unchanged
+ Firestore requires a proprietary SDK 
+\change_deleted 2090082705 1578920709
+to be used
+\change_inserted 2090082705 1578920711
+for database actions
+\change_unchanged
+, a simple database layer was written to match much of what would be achieved
  with a traditional Object-Relation Mapping (ORM).
- Worth noting however is that this was not as fast as industry standard
- libraries such as SQL-alchemy could provide, reading and writing to the
- database were the slowest aspects of the program and could definitely be
- optimised further.
+\end_layout
+
+\begin_layout Standard
+Worth noting however is that this was not as fast as industry standard libraries
+ such as SQL-alchemy could provide, reading and writing to the database
+ were the slowest aspects of the program and could definitely be optimised
+ further.
  This architecture was achieved while remaining within the free quotas for
- all services making the development process free.
+ all services
+\change_deleted 2090082705 1578920851
+ making the development process free
+\change_unchanged
+.
 \end_layout
 
 \begin_layout Section
@@ -1316,12 +1723,13 @@ Finally the space for development is presented, highlighting the investigations
 \begin_layout Standard
 Despite these areas the final product successfully fulfils the specifications
  for cloud data storage in a stable and self-descriptive manner.
-\end_layout
+\change_inserted 2090082705 1578874749
 
-\begin_layout Standard
-\begin_inset Newpage newpage
+\begin_inset Newpage pagebreak
 \end_inset
 
+
+\change_unchanged
 
 \end_layout
 
@@ -1338,22 +1746,41 @@ Environmental Impacts
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578871594
 While ostensibly being a response to the future of mobility grand challenge,
- the subject of the project being electric vehicles has obvious links with
+ t
+\change_inserted 2090082705 1578871594
+T
+\change_unchanged
+he subject of the project being electric vehicles has obvious links with
  the environment and as such the wider environmental effects should be considere
 d.
- While it is important to consider the direct sustainability, as has been
+ 
+\change_deleted 2090082705 1578871608
+While it is important to consider the direct sustainability, as has been
  done earlier, it is also worth investigating how the service encourages
  through it’s existence and use.
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
 Initially it could be considered that the wider use of a vehicle charge
- management system would be positive.
- This would come as a result of the incentive provided by being able to
- charge a user’s car while at locations such as a workplace with limited
- spaces.
+ management system would be positive
+\change_inserted 2090082705 1578871651
+ in this regard
+\change_unchanged
+.
+ This would 
+\change_deleted 2090082705 1578871657
+come
+\change_inserted 2090082705 1578871657
+be
+\change_unchanged
+ as a result of the incentive provided by being able to charge a user’s
+ car while at locations such as a workplace with limited spaces.
  As a result, the members of the workplace could be more likely to use electric
  vehicles over the alternative and the use of fossil fuelled cars would
  decrease.
@@ -1361,6 +1788,8 @@ Initially it could be considered that the wider use of a vehicle charge
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578871768
 However the service is designed to allow as much car charging as possible
  throughout the day.
  When a user’s car is full they are required to move it so another user
@@ -1369,12 +1798,28 @@ However the service is designed to allow as much car charging as possible
  system is used, the user would probably not move the car throughout the
  day and so when the car has finished charging, the draw of power will stop.
  
+\change_inserted 2090082705 1578871719
+
 \end_layout
 
 \begin_layout Standard
+
+\change_inserted 2090082705 1578871758
+However in practice, a management system of the type presented here encourages
+ sustained usage of charging stations throughout the day, possibly leading
+ to an overall increase in power usage.
+\change_unchanged
+
+\end_layout
+
+\begin_layout Standard
+
+\change_deleted 2090082705 1578871782
 Almost ironically the use of such an environmentally-minded service could
  actually increase the amount of power being used.
- At a time when the majority of power generated in the UK still comes from
+ 
+\change_unchanged
+At a time when the majority of power generated in the UK still comes from
  fossil fuels the overall effect could be negative.
  It is worth defining, then, the point of such a service and how it responds
  to the grand challenge it aims to solve.
@@ -1385,30 +1830,78 @@ The Future of Mobility Grand Challenge
 \end_layout
 
 \begin_layout Standard
+
+\change_inserted 2090082705 1578871845
+This service aims to improve the future of mobility by easing the adoption
+ of a new form of travel in electric vehicles.
+ 
+\change_deleted 2090082705 1578871860
 The scheduling service is intended to incentivise the use of electric vehicles
  by making it easier to charge them at a time where EVs are still, to an
  extent, in an immature state.
- As the amount of energy generated through renewables increases, the weight
- of the aforementioned negative impact is reduced while the energy sources
- of the assumed larger population of electric vehicles are made more sustainable.
+ 
+\change_unchanged
+As the amount of energy generated through renewable
+\change_inserted 2090082705 1578871911
+ mean
+\change_unchanged
+s increases, the
+\change_inserted 2090082705 1578872022
+ negative effects of increased usage is reduced.
+
+\change_deleted 2090082705 1578872023
+ weight of the aforementioned negative impact is reduced while the energy
+ sources of the assumed larger population of electric vehicles are made
+ more sustainable.
  To directly respond to the grand challenge, this service aims to improve
  the future of mobility by easing the adoption of a new form of travel in
  electric vehicles.
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
 The main drawbacks of EVs in comparison to their traditional fossil fuel
- counterparts are the frequency with which the battery must be charged,
- the length of time it takes to charge the battery and the availability
- of battery charging infrastructure.
- This service aims to allow the most efficient use of limited charging infrastru
-cture such that EV owners can reduce the effects of these disadvantages
- and further encourage this emerging technology.
+ counterparts are
+\change_deleted 2090082705 1578872380
+ the frequency with which the
+\change_unchanged
+ battery
+\change_inserted 2090082705 1578872384
+ range
+\change_deleted 2090082705 1578872386
+ must be charged
+\change_unchanged
+, 
+\change_deleted 2090082705 1578872395
+the length of time it takes to charge the battery
+\change_inserted 2090082705 1578872360
+charging times
+\change_unchanged
+ and the availability of
+\change_inserted 2090082705 1578872448
+ charging stations
+\change_deleted 2090082705 1578872448
+ battery charging infrastructure.
+
+\change_unchanged
+ This service aims to allow the most efficient use of 
+\change_deleted 2090082705 1578872453
+limited 
+\change_unchanged
+charging infrastructure such that 
+\change_inserted 2090082705 1578922335
+these limitations can be reduced and the technology further encouraged.
+\change_deleted 2090082705 1578872466
+EV owners can reduce the effects of these disadvantages and further encourage
+ this emerging technology.
  While the above could demonstrate a larger draw of electricity at a time
  where this is still predominantly unsustainable, it ultimately promotes
  the adoption of a technology that will benefit from better sourced electricity
  in the future.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsection
@@ -1417,11 +1910,19 @@ User Behaviour
 
 \begin_layout Standard
 Another aspect of the service worth considering is the way in which bad
- faith interaction is reacted to and punished by the service.
+ faith interaction
+\change_inserted 2090082705 1578872532
+ such as delaying the removal of a full car
+\change_unchanged
+ is reacted to and punished by the service.
+
+\change_deleted 2090082705 1578872521
  This negative behaviour would include actions such as delaying the start
  of a charging session when a user is selected and leaving a full car in
  the charging spot following the completion of a session.
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
@@ -1432,15 +1933,27 @@ The aim of a user’s score is to punish bad actors by reducing their ability
 \end_layout
 
 \begin_layout Standard
+
+\change_deleted 2090082705 1578872561
 The user’s score, however, only affects a user within the context of the
  service.
  When considering the reasons for such “bad” interactions in a workplace
  environment many would be justifiable.
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
-Overrunning meetings or time sensitive work are both common and when considering
+
+\change_inserted 2090082705 1578872569
+However, 
+\change_deleted 2090082705 1578872570
+O
+\change_inserted 2090082705 1578872571
+o
+\change_unchanged
+verrunning meetings or time sensitive work are both common and when considering
  how the service is ultimately a utility for the company owning the charging
  spots, few if any would prioritise the interactions with the car charging
  structure over the work being completed by the employee for that company.
@@ -1449,8 +1962,17 @@ Overrunning meetings or time sensitive work are both common and when considering
 
 \begin_layout Standard
 This highlights both how reliant the service is on users engaging in good
- faith to facilitate smooth operation and how the service could be susceptible
- to abuse.
+ faith 
+\change_deleted 2090082705 1578872704
+to facilitate smooth operation 
+\change_unchanged
+and how the 
+\change_deleted 2090082705 1578922398
+service
+\change_inserted 2090082705 1578922398
+system
+\change_unchanged
+ could be susceptible to abuse.
 \end_layout
 
 \begin_layout Subsection
@@ -1458,10 +1980,23 @@ Group Work
 \end_layout
 
 \begin_layout Standard
-Development of the three aspects of the service - the hardware unit, mobile
- application and cloud services were, in general, developed separately with
- a process of integration and final testing to assemble the final product.
+Development of the three
+\change_inserted 2090082705 1578919001
+ facets
+\change_deleted 2090082705 1578918999
+ aspects
+\change_unchanged
+ of the service
+\change_deleted 2090082705 1578919014
+ - the hardware unit, mobile application and cloud services
+\change_unchanged
+ were, in general, developed separately with a process of integration and
+ final testing to assemble the final product.
+
+\change_deleted 2090082705 1578919008
  
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard
