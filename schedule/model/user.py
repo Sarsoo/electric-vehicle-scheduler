@@ -81,6 +81,7 @@ class User:
     def send_notification(self, title: str, body: str):
 
         if self.notification_token is None:
+            logger.error(f'{self.username} no notification token')
             return
 
         message = messaging.Message(
@@ -141,16 +142,18 @@ class User:
             if value == self.State.in_queue:
                 pass
             elif value == self.State.assigned:
-                self.send_notification('Scheduler', "You've been assigned a session!")
+                self.send_notification('Scheduler', "You've been assigned a charger!")
             elif value in [self.State.connected_charging, self.State.connected_full]:
                 logger.warning(f'weird state change, {self.state.name} to {value.name}')
         elif self.state == self.State.in_queue:
             if value == self.State.inactive:
                 pass
-            elif value in [self.State.assigned, self.State.connected_full]:
+            elif value == self.State.assigned:
+                self.send_notification('Scheduler', "You've been assigned a charger!")
+            elif value == self.State.connected_full:
                 logger.warning(f'weird state change, {self.state.name} to {value.name}')
             elif value == self.State.connected_charging:
-                pass
+                self.send_notification('Scheduler', "Charging Started")
         elif self.state == self.State.assigned:
             if value == self.State.inactive:
                 pass
@@ -160,11 +163,11 @@ class User:
                 pass
         elif self.state == self.State.connected_charging:
             if value == self.State.inactive:
-                pass
+                self.send_notification('Scheduler', "Session Cancelled")
             elif value in [self.State.in_queue, self.State.assigned]:
                 logger.warning(f'weird state change, {self.state.name} to {value.name}')
             elif value == self.State.connected_full:
-                self.send_notification('Scheduler', "You're car has finished charging")
+                self.send_notification('Scheduler', "INFO: Your car has finished charging, please move your car")
         elif self.state == self.State.connected_full:
             if value == self.State.inactive:
                 pass
