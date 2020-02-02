@@ -204,7 +204,7 @@ def put_charger(location_id, charger_id, current_user):
                     new_state = Charger.State[request_json['state'].lower()]
                     if charger_obj.state == Charger.State.available and new_state == Charger.State.pre_session:
                         return post_session(location_id, charger_id, current_user)
-                    elif charger_obj.state == Charger.State.full and new_state == Charger.State.available:
+                    if new_state == Charger.State.available:
                         return delete_session(location_id, charger_id, current_user)
                     else:
                         charger_obj.state = new_state
@@ -289,14 +289,17 @@ def delete_charger(location_id, charger_id, current_user):
         }), 404
 
 
-@blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['GET'])
+@blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['GET', 'DELETE'])
 @access_token
+@url_arg_username_override
 def session(location_id, charger_id, current_user: User = None):
     if request.method == 'GET':
         return get_session(location_id, charger_id, current_user)
+    elif request.method == 'DELETE':
+        return delete_session(location_id, charger_id, current_user)
 
 
-@blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['PUT', 'POST', 'DELETE'])
+@blueprint.route('/<location_id>/charger/<charger_id>/session', methods=['PUT', 'POST'])
 @access_token
 @admin_required
 @url_arg_username_override
@@ -305,8 +308,6 @@ def session_restricted(location_id, charger_id, current_user: User = None):
         return put_session(location_id, charger_id, current_user)
     elif request.method == 'POST':
         return post_session(location_id, charger_id, current_user)
-    elif request.method == 'DELETE':
-        return delete_session(location_id, charger_id, current_user)
 
 
 def get_session(location_id, charger_id, current_user):
