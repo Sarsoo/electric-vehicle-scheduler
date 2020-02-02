@@ -190,7 +190,7 @@ def get_charger(location_id, charger_id, current_user):
 
 
 def put_charger(location_id, charger_id, current_user):
-    logger.info(f'updating {location_id}:{charger_id} for {current_user}')
+    logger.debug(f'updating {location_id}:{charger_id} for {current_user}')
 
     charger_obj = database.get_charger(location_id, charger_id)
 
@@ -202,6 +202,7 @@ def put_charger(location_id, charger_id, current_user):
             if 'state' in request_json:
                 try:
                     new_state = Charger.State[request_json['state'].lower()]
+                    logger.info(f'changing state for {location_id}:{charger_id} from {charger_obj.state.name} to {new_state.name}')
                     if charger_obj.state == Charger.State.available and new_state == Charger.State.pre_session:
                         return post_session(location_id, charger_id, current_user)
                     if new_state == Charger.State.available:
@@ -225,6 +226,9 @@ def put_charger(location_id, charger_id, current_user):
                                    f'{location_id}:{charger_id}:{charger_obj.active_session}',
                         'status': 'error'
                     }), 400
+            else:
+                logger.error('malformed request, no state key')
+
         else:
             logger.error(f'no session running at {location_id}:{charger_id}')
             return jsonify({

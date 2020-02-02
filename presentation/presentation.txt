@@ -1,22 +1,21 @@
-The idea of these cloud services is to securely provide access to a single source of data for the app and hardware to use.
-This information is user information and service data.
-At a high level we do this with an internet facing layer of logic in front of a database for storage, on the internet that layer of logic is generally a HTTP server.
+The idea of these cloud services is to securely provide access to a central source of information for the app and hardware to use over the internet.
+At a high level we do this with a layer of logic in front of a database for storage, on the internet that layer of logic is generally a HTTP server.
 
-There are a lot of ways to create a structure like this, from physical servers to virtual machines but the popularity of cloud computing platforms like those run by Amazon and Google has seen the development of new technologies that make this less nessecary.
+There are a lot of ways to create a structure like this from physical servers to virtual machines but the popularity of cloud computing platforms like those run by Amazon and Google has brought new technologies that make this less nessecary.
 
-One of the these is serverless computing. Serverless computing is a way of hosting code in the cloud in a way that makes it feel like it's not running on any distinct, real server.
+One of the these is serverless computing. Serverless computing is a way of hosting code in the cloud in a way that makes it feel like it's not running on a distinct, real server.
 
-In doing so, a lot of the security overhead required when deploying a server to the internet can be reduced. There's no need to set up firewalls or tightly admin any VMs with OS updates.
-
-Instead of paying for the amount of time that a virtual machine is spent up and running, serverless hosting is charged in a more pay-as-you-go way, only while the service responds to requests.
+In doing so, a lot of the overhead when deploying a server to the internet can be reduced. There's no need to set up firewalls or tightly admin any VMs with OS and software updates and this can make development and deployment really quick.
 
 Not being tied to individual servers also means that the service can be highly available and dynamic. One of the strongest features of a serverless architecture is automatic scaling in response to increased demand which means that when running on a massive infrastructure like google's, the service can have global reach and handle a lot more traffic than would be possible otherwise.
+
+Additionally hosting is also charged only while the service is actively handling requests and it's free while idle.
 
 <change to architecture slide>
 
 Looking at this structure you can see the HTTP API acts as the public gateway for both the android app and hardware and sits in front of a database. 
 Firebase cloud messaging is used to send notifications to app users at key points in the charging cycle and then the two cloud functions at the bottom are scheduled tasks for the service like clearing queueus each day and refreshing access tokens for the authentication system.
 
-<change to map>
+<change to api layout>
 
 The HTTP API itself uses a REST-ful design where each URL represents an object and the method used on the URL represents a specific action, creating a user, updating the state of a charging station. This is an industry standard layout that allows consistency both within the API and when encountering new ones.
