@@ -1,21 +1,29 @@
-The idea of these cloud services is to securely provide access to a central source of information for the app and hardware to use over the internet.
-At a high level we do this with a layer of logic in front of a database for storage, on the internet that layer of logic is generally a HTTP server.
+We are group I, <names>, we are presenting our response to one of the governments grand challenges with our electric vehicle charge sharing system.
+In our allowed time we are going to run through what our product aims to do, how it does it and how we went about working on it. First it's worth defining how our project relates back to those grand challenges.
 
-There are a lot of ways to create a structure like this from physical servers to virtual machines but the popularity of cloud computing platforms like those run by Amazon and Google has brought new technologies that make this less nessecary.
 
-One of the these is serverless computing. Serverless computing is a way of hosting code in the cloud in a way that makes it feel like it's not running on a distinct, real server.
 
-In doing so, a lot of the overhead when deploying a server to the internet can be reduced. There's no need to set up firewalls or tightly admin any VMs with OS and software updates and this can make development and deployment really quick.
+The purpose of these cloud services is to securely provide access to a central source of information for the app and hardware to use over the internet.
+At a high level we do this with a layer of logic in front of a database for storage, on the internet this is generally a HTTP server.
 
-Not being tied to individual servers also means that the service can be highly available and dynamic. One of the strongest features of a serverless architecture is automatic scaling in response to increased demand which means that when running on a massive infrastructure like google's, the service can have global reach and handle a lot more traffic than would be possible otherwise.
+There are a lot of ways to put an HTTP server on the internet from directly on physical hardware to virtual machines which has been the standard but the advent of cloud computing has brought new technologies.
 
-Additionally hosting is also charged only while the service is actively handling requests and it's free while idle.
+One of the these is serverless computing. Serverless hosting directly deploys code onto the internet without the typically required server administration.
+
+Using this we were able to deploy our system with no need to manage OS installations, SSL certificates or firewalls.
+The system is available worldwide and scales automatically in response to higher traffic.
+
+Additionally hosting is also only charged while the service is actively handling requests and is free while idle.
 
 <change to architecture slide>
 
-Looking at this structure you can see the HTTP API acts as the public gateway for both the android app and hardware and sits in front of a database. 
+This is the cloud architecture we've designed using GCP.
+Looking at this structure you can see the HTTP API acts as the public gateway for both the app and hardware and sits in front of a NoSQL database.
 Firebase cloud messaging is used to send notifications to app users at key points in the charging cycle and then the two cloud functions at the bottom are scheduled tasks for the service like clearing queueus each day and refreshing access tokens for the authentication system.
+Cloud functions provide serverless hosting for individual functions of source code as opposed to the app engine which is serverless hosting for the entire HTTP API. This makes them ideal for smaller scale tasks and microservices
 
 <change to api layout>
 
-The HTTP API itself uses a REST-ful design where each URL represents an object and the method used on the URL represents a specific action, creating a user, updating the state of a charging station. This is an industry standard layout that allows consistency both within the API and when encountering new ones.
+This is the layout of the available HTTP routes. The API uses a REST-ful design where each URL represents an object and the method used on the URL represents a specific action, creating a user, updating the state of a charging station. This is an industry standard layout that allows consistency both within the API and when encountering new ones.
+
+With the individual aspects of the project defined, It's time for a demonstration
