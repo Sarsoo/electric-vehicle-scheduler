@@ -30,5 +30,5 @@ requests==2.22.0
 rsa==4.1
 six==1.13.0
 uritemplate==3.0.0
-urllib3==1.25.7
+urllib3==1.25.8
 Werkzeug==0.16.0
